@@ -8,6 +8,6 @@ All three services are based on the newest releases of [RDFLib](https://github.c
 * check the error handling for each of these services
 * collect the form data coming from the HTML pages, call out to the RDF parsing and return the serialized graph or (in the case of the RDFa Validator) generate a proper HTML response.
 
-## Warning in January 2017
+## Status in January 2017
 
-This module is in development for now. The current services rely on a different, and outdated architecture, whereby the CGI scripts called out to a full, and separate, RDFa (resp. Microdata) module that is *on top* of RDFLib. That was the right approach when the corresponding parsers had not yet been incorporated into RDFLib. It is now time to remove that separate layer; hopefully, this module will be finalized sometimes in 2017.
+*This module is in development for now.* The current services rely on a different, and outdated architecture, whereby the CGI scripts called out to a full, and separate, RDFa (resp. Microdata) module that is *on top* of RDFLib. That was the right approach when the corresponding parsers had not yet been incorporated into RDFLib. It is now time to remove that separate layer; hopefully, this module will be finalized sometimes in 2017.
