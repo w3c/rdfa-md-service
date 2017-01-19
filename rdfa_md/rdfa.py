@@ -1,3 +1,7 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# Maintainer: Ivan Herman <ivan@w3.org>
+from __future__ import print_function
 import sys
 PY3 = (sys.version_info[0] >= 3)
 
@@ -12,7 +16,7 @@ from rdflib import Graph
 #  The core: handling the form arguments (after some prior check done elsewhere),
 #  use the RDFLib parser to extract the RDF graph, serialize it and return to the caller
 #########################################################################################
-def processURI(uri, form) :
+def extract_rdf(uri, form) :
 	"""The standard processing of an RDFa uri options in a form; used as an entry point from a CGI call.
 
 	The call accepts extra form options (i.e., HTTP GET options) as follows:
@@ -50,7 +54,7 @@ def processURI(uri, form) :
 			return default
 
 	# Retrieve the output (serialziation) format
-	if "format" in form.keys() :
+	if "format" in list(form.keys()) :
 		outputFormat = form.getfirst("format")
 	else :
 		outputFormat = "turtle"

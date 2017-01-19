@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Maintainer: Ivan Herman <ivan@w3.org>
-
 """
 Possible CGI entry point for the RDFa 1.1 package.
 
@@ -13,6 +12,7 @@ This version is adapted to the particualarities of the W3C setup as well as my o
 U{W3C® SOFTWARE NOTICE AND LICENSE<href="http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231">}
 @contact: Ivan Herman, ivan@w3.org
 """
+from __future__ import print_function
 
 __version__ = "3.0"
 import cgi
@@ -35,7 +35,7 @@ else :
 	os.environ['PyRdfaCacheDir'] = '/usr/local/apache/cgi/cgi-bin-other/RDFa/data-local'
 	cgitb.enable(display=0, logdir="/home/nobody/tracebacks/")
 
-from rdfa_md import processURI, err_message, brett_test
+from rdfa_md import extract_rdf, err_message, brett_test
 
 
 def uri_test(uri) :
@@ -65,33 +65,33 @@ def process_input(form):
 	else :
 		# Either there is an error, and we have to stop there, or it is a real URI
 		if not "uri" in form :
-			print 'Content-type: text/html; charset=utf-8'
-			print 'Status: 400 Invalid Input'
-			print
-			print "<html>"
-			print "<head>"
-			print "<title>Error in RDFa processing</title>"
-			print "</head><body>"
-			print "<h1>Error in distilling RDFa</h1>"
-			print "<p>No URI has been specified</p>"
-			print "</body>"
-			print "</html>"
+			print('Content-type: text/html; charset=utf-8')
+			print('Status: 400 Invalid Input')
+			print("")
+			print("<html>")
+			print("<head>")
+			print("<title>Error in RDFa processing</title>")
+			print("</head><body>")
+			print("<h1>Error in distilling RDFa</h1>")
+			print("<p>No URI has been specified</p>")
+			print("</body>")
+			print("</html>")
 			sys.exit(1)
 
 		try :
 			uri = form.getfirst("uri")
 		except :
-			print 'Content-type: text/html; charset=utf-8'
-			print 'Status: 400 Invalid Input'
-			print
-			print "<html>"
-			print "<head>"
-			print "<title>Error in RDFa processing</title>"
-			print "</head><body>"
-			print "<h1>Error in distilling RDFa</h1>"
-			print "No URI has been specified"
-			print "</body>"
-			print "</html>"
+			print('Content-type: text/html; charset=utf-8')
+			print('Status: 400 Invalid Input')
+			print("")
+			print("<html>")
+			print("<head>")
+			print("<title>Error in RDFa processing</title>")
+			print("</head><body>")
+			print("<h1>Error in distilling RDFa</h1>")
+			print("No URI has been specified")
+			print("</body>")
+			print("</html>")
 			sys.exit(1)
 
 	# If we got here, we should have the data hidden, in some way or other, behind the form data
@@ -101,9 +101,9 @@ def process_input(form):
 		from rdfavalidator import validateURI
 		if not (uri == 'text:' or uri == 'uploaded:') :
 			uri_test(uri)
-		print 'Content-Type: text/html; charset=utf-8'
-		print
-		print validateURI(uri, form)
+		print('Content-Type: text/html; charset=utf-8')
+		print("")
+		print(validateURI(uri, form))
 	else :
 		try :
 			# Thanks to Sergio and Diego for the idea and code for the referer branch
@@ -114,19 +114,18 @@ def process_input(form):
 				else:
 					uri_test(uri)
 					newuri = "http://www.w3.org/2012/pyRdfa/extract?uri=" + uri
-				print "Status: 307 Moved Temporarily"
-				print "Location: " + newuri
-				print
+				print("Status: 307 Moved Temporarily")
+				print("Location: " + newuri)
+				print("")
 			else :
 				# last point of check: use Brett's script to check the validity of the URI
 				if not (uri == 'text:' or uri == 'uploaded:') :
 					uri_test(uri)
 
-				retval = processURI(uri, form)
-				print retval
+				print(extract_rdf(uri, form))
 		except Exception as e :
 			l = len(e.args)
-			msg = "" if l == 0 else (e.args[0] if l == 1 else `e.args`)
+			msg = "" if l == 0 else (e.args[0] if l == 1 else repr(e.args))
 			err_message('Exception raised: "%s"' % msg)
 
 
