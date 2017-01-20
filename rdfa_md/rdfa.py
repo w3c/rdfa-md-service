@@ -35,14 +35,14 @@ def extract_rdf(uri, form) :
 	@param uri: URI to access. Note that the C{text:} and C{uploaded:} fake URI values are treated separately; the former is for textual intput (in which case a StringIO is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
 
 	@param form: extra call options (from the CGI call) to set up the local options
-
 	@type form: cgi FieldStorage instance
 
 	@return: serialized graph
 	@rtype: string
 	"""
-	# Using 'list' is necessary on Python3; this avoids me to call this all the time...
+	# Using 'list' is necessary on Python3; this variable avoids me to call this all the time...
 	form_keys  = list(form.keys())
+
 	#####
 	# Just factoring out repeated steps...
 	# - get a value from the form, returning None if it is not present
