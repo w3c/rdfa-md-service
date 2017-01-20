@@ -1,6 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Maintainer: Ivan Herman <ivan@w3.org>
+"""
+Module to handle RDFa
+   - extract RDF from an input content by parsing it for RDFa
+   - validate RDFa data as extracted from an input content
+
+Validation means to extract the RDFa content, using the same parser, and examining the (possible) error
+(RDF) triples that the parser generates. If any, those are displayed in a readable HTML content.
+
+Dependencies within the module:
+	- RDF Extraction: None
+	- RDFa Validation:
+		- errors.py: working through the error triples to produce proper output
+		- validator_html.py: a single HTML template to be used for the generated output
+
+"""
 from __future__ import print_function
 import sys
 PY3 = (sys.version_info[0] >= 3)
@@ -8,19 +23,23 @@ PY3 = (sys.version_info[0] >= 3)
 import traceback, cgi
 if PY3 :
 	from io import StringIO
+	from urllib.error import HTTPError
 else :
 	from StringIO import StringIO
+	from urllib2 import HTTPError
+
 from rdflib import Graph
 from rdflib.plugins.parsers.pyRdfa.host import MediaTypes
 
-#########################################################################################
-#  The core: handling the form arguments (after some prior check done elsewhere),
-#  use the RDFLib parser to extract the RDF graph, serialize it and return to the caller
-#########################################################################################
-def extract_rdf(uri, form) :
-	"""The standard processing of an RDFa uri options in a form; used as an entry point from a CGI call.
+#############################################################################################
+# Common class to handle the (CGI) form object values
+#############################################################################################
+class FormValues(object):
+	"""Various options to be extracted from the form (ie, a CGI FieldStorage instance)
+	This class collects what is common in handling simple RDF parsing as well as for
+	the validator.
 
-	The call accepts extra form options (i.e., HTTP GET options) as follows:
+	The meaning of the form values are:
 
 	 - C{graph=[output|processor|output,processor|processor,output]} specifying which graphs are returned. Default: C{output}
 	 - C{space_preserve=[true|false]} means that plain literals are normalized in terms of white spaces. Default: C{false}
@@ -31,6 +50,76 @@ def extract_rdf(uri, form) :
 	 - C{vocab_cache_report=[true|false]} : whether vocab caching details should be reported. Default: C{false}
 	 - C{vocab_cache_bypass=[true|false]} : whether vocab caches have to be regenerated every time. Default: C{false}
 	 - C{rdfa_lite=[true|false]} : whether warnings should be generated for non RDFa Lite attribute usage. Default: C{false}
+	"""
+	def __init__(self, form):
+		self.form = form
+		self.keys = list(form.keys())
+		self.host_language		 = self.get_value("host_language")
+		self.media_type          = self._get_media_type()
+		self.check_lite          = (self.get_value("rdfa_lite") == "true")
+		self.embedded_rdf        = self.check_option("embedded_rdf", "true", False)
+		self.space_preserve      = self.check_option("space_preserve", "true", True)
+		self.vocab_cache         = self.check_option("vocab_cache", "true", True)
+		self.vocab_cache_report  = self.check_option("vocab_cache_report", "true", False)
+		self.refresh_vocab_cache = self.check_option("vocab_cache_refresh", "true", False)
+		self.vocab_expansion     = self.check_option("vocab_expansion", "true", False)
+		self.output_format       = self.get_value("format")
+		if self.output_format is None:
+			self.output_format = "turtle"
+
+	def _get_media_type(self):
+		if self.host_language is None:
+			media_type = ""
+		elif self.host_language == "xhtml" :
+			media_type = MediaTypes.xhtml
+		elif self.host_language == "html" :
+			media_type = MediaTypes.html
+		elif self.host_language == "svg" :
+			media_type = MediaTypes.svg
+		elif self.host_language == "atom" :
+			media_type = MediaTypes.atom
+		else :
+			media_type = MediaTypes.xml
+		return media_type
+
+	def get_value(self, key):
+		"""Get a value if exists, None otherwise"""
+		return self.form.getfirst(key).lower() if key in self.keys else None
+
+	def get_value2(self, key1, key2):
+		"""Get one of two options, in priority order, None if neither is present"""
+		retval = self.get_value(key1)
+		return self.get_value(key2) if retval is None else retval
+
+	def check_option(self, key, compare_value, default):
+		"""Check how the value for `key` compares with the value. If no value
+		is present, returns default."""
+		# The second alternative is to ensure that the old style
+		# parameters are still valid.
+		# in the old days I used '-' in the parameters, the standard favours '_'
+		val = self.get_value2(key, key.replace('_','-'))
+		return default if val is None else val == compare_value
+
+	def get_source_and_base(self, uri):
+		""" Return the location of the source data; usually it is a URI but,
+		in some cases, it may return to the embedded data in the form"""
+		# Collect the data, depending on what mechanism is used in the form
+		if uri == "uploaded:" :
+			return (form["uploaded"].file, "")
+		elif uri == "text:" :
+			return (StringIO(form.getfirst("text")), "")
+			base	= ""
+		else :
+			return (uri,uri)
+
+#########################################################################################
+# RDF Extraction:  use the RDFLib parser to extract the RDF graph, serialize it and
+# return to the caller
+# In case or problems, an HTTP response is generated incorporating the Exception data and
+# some basic information on the calling parameters.
+#########################################################################################
+def extract_rdf(uri, form) :
+	"""The standard processing of an RDFa uri options in a form; used as an entry point from a CGI call.
 
 	@param uri: URI to access. Note that the C{text:} and C{uploaded:} fake URI values are treated separately; the former is for textual intput (in which case a StringIO is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
 
@@ -40,72 +129,14 @@ def extract_rdf(uri, form) :
 	@return: serialized graph
 	@rtype: string
 	"""
-	# Using 'list' is necessary on Python3; this variable avoids me to call this all the time...
-	form_keys  = list(form.keys())
 
-	#####
-	# Just factoring out repeated steps...
-	# - get a value from the form, returning None if it is not present
-	# - get a value with two alternative keys (in priority order), None if neither is present
-	_get_value  = lambda key: form.getfirst(key).lower() if key in form_keys else None
-	def _get_value2(key1, key2):
-		retval = _get_value(key1)
-		return _get_value(key2) if retval is None else retval
-
-	####
-	# See if a key is present and is of a certain value; if the key is not present,
-	# return the default (boolean) value
-	def _get_option(param, compare_value, default) :
-		# The second alternative is to ensure that the old style
-		# parameters are still valid.
-		# in the old days I used '-' in the parameters, the standard favours '_'
-		val = _get_value2(param, param.replace('_','-'))
-		return default if val is None else val == compare_value
-
-
-	# Retrieve the output (serialziation) format
-	outputFormat = _get_value("format")
-	if outputFormat is None: outputFormat = "turtle"
+	form_values = FormValues(form)
 
 	# Collect the data, depending on what mechanism is used in the form
-	if uri == "uploaded:" :
-		input	= form["uploaded"].file
-		base	= ""
-	elif uri == "text:" :
-		input	= StringIO(form.getfirst("text"))
-		base	= ""
-	else :
-		input	= uri
-		base	= uri
+	(input, base) = form_values.get_source_and_base(uri)
 
-	# working through the possible options
-	# Host language: HTML, XHTML, or XML
-	# Note that these options should be used for the upload and inline version
-	# only in case of a form for real uris the returned content type should be used
-	host_language = _get_value("host_language")
-	if host_language is None:
-		media_type = ""
-	elif host_language == "xhtml" :
-		media_type = MediaTypes.xhtml
-	elif host_language == "html" :
-		media_type = MediaTypes.html
-	elif host_language == "svg" :
-		media_type = MediaTypes.svg
-	elif host_language == "atom" :
-		media_type = MediaTypes.atom
-	else :
-		media_type = MediaTypes.xml
-
-	check_lite = (_get_value("rdfa_lite") == "true")
-
-	output_default_graph 	= True
-	output_processor_graph 	= False
-	# Note that I use the 'graph' and the 'rdfagraph' form keys here. Reason is that
-	# I used 'graph' in the previous versions, including the RDFa 1.0 processor,
-	# so if I removed that altogether it would create backward incompatibilities
-	# On the other hand, the RDFa 1.1 doc clearly refers to 'rdfagraph' as the standard
-	# key.
-	graph_choice = _get_value2("rdfagraph", "graph")
+	# Decide which graphs should be sent back
+	graph_choice = form_values.get_value2("rdfagraph", "graph")
 	if graph_choice == "processor":
 		(output_default_graph, output_processor_graph) = (False, True)
 	elif graph_choice == "processor,output" or graph_choice == "output,processor":
@@ -113,14 +144,8 @@ def extract_rdf(uri, form) :
 	else:
 		(output_default_graph, output_processor_graph) = (True, False)
 
-	# Get the other options from the form, setting also the default, if needed
-	embedded_rdf        = _get_option( "embedded_rdf", "true", False)
-	space_preserve      = _get_option( "space_preserve", "true", True)
-	vocab_cache         = _get_option( "vocab_cache", "true", True)
-	vocab_cache_report  = _get_option( "vocab_cache_report", "true", False)
-	refresh_vocab_cache = _get_option( "vocab_cache_refresh", "true", False)
-	vocab_expansion     = _get_option( "vocab_expansion", "true", False)
-	if vocab_cache_report : output_processor_graph = True
+	# These values may be overridden in one case...
+	if form_values.vocab_cache_report : output_processor_graph = True
 
 	# Almost ready to work; creating the two RDF Graphs
 	output_graph    = Graph()
@@ -130,14 +155,14 @@ def extract_rdf(uri, form) :
 	output_graph.parse(input,
 					   format              = "rdfa",
 					   pgraph              = processor_graph,
-					   media_type          = media_type,
-					   embedded_rdf        = embedded_rdf,
-					   space_preserve      = space_preserve,
-					   vocab_expansion     = vocab_expansion,
-					   vocab_cache         = vocab_cache,
-					   refresh_vocab_cache = refresh_vocab_cache,
-					   vocab_cache_report  = vocab_cache_report,
-					   check_lite          = check_lite
+					   media_type          = form_values.media_type,
+					   embedded_rdf        = form_values.embedded_rdf,
+					   space_preserve      = form_values.space_preserve,
+					   vocab_expansion     = form_values.vocab_expansion,
+					   vocab_cache         = form_values.vocab_cache,
+					   refresh_vocab_cache = form_values.refresh_vocab_cache,
+					   vocab_cache_report  = form_values.vocab_cache_report,
+					   check_lite          = form_values.check_lite
 					   )
 
 	# Next step is to create the final graph to be returned to the user; this depends on
@@ -152,13 +177,13 @@ def extract_rdf(uri, form) :
 	try :
 		# "header" collects the HTTP response; first the header with the content type,
 		# then the real data
-		if outputFormat == "nt" :
+		if form_values.output_format == "nt" :
 			header = 'Content-Type: application/n-triples; charset=utf-8\n'
 			format = "nt"
-		elif outputFormat == "turtle" :
+		elif form_values.output_format == "turtle" :
 			header = 'Content-Type: text/turtle; charset=utf-8\n'
 			format = "turtle"
-		elif outputFormat == "json-ld" or outputFormat == "json" :
+		elif form_values.output_format == "json-ld" or form_values.output_format == "json" :
 			# This requires extra care, because the JSON-LD serializer is a separate
 			# plugin for RDFLib (alas...)
 			# If this is not successful, we are falling back on turtle
@@ -179,10 +204,9 @@ def extract_rdf(uri, form) :
 			format = "pretty-xml"
 		# Extra empty line to end the HTTP response header
 		return header + "\n" + final_graph.serialize(format=format)
-	except HTTPError :
+	except HTTPError:
 		(type,h,traceback) = sys.exc_info()
-
-		retval =  'Status: 400 Invalid Input'
+		retval =  'Status: 400 Invalid Input\n'
 		retval += 'Content-type: text/html; charset=utf-8\nStatus: %s \n\n' % h.http_code
 		retval += "<html>\n"
 		retval += "<head>\n"
@@ -194,13 +218,14 @@ def extract_rdf(uri, form) :
 		retval +="</body>\n"
 		retval +="</html>\n"
 		return retval
-	except :
+	except Exception as e:
 		# This branch should occur only if an exception is really raised, ie, if it is not turned
 		# into a graph value.
-		(type,value,traceback) = sys.exc_info()
-
-		retval =  'Status: 400 Invalid Input'
-		retval += 'Content-type: text/html; charset=utf-8\nStatus: %s\n\n' % processor.http_status
+		import traceback
+		retval =  'Status: 400 Invalid Input\n'
+		retval += 'Content-type: text/html; charset=utf-8\n'
+		retval += 'Status: %s\n' % 400
+		retval += '\n'
 		retval += "<html>\n"
 		retval += "<head>\n"
 		retval += "<title>Exception in RDFa processing</title>\n"
@@ -211,7 +236,6 @@ def extract_rdf(uri, form) :
 		traceback.print_exc(file=strio)
 		retval += strio.getvalue()
 		retval +="</pre>\n"
-		retval +="<pre>%s</pre>\n" % value
 		retval +="<h1>Distiller request details</h1>\n"
 		retval +="<dl>\n"
 		if uri == "text:" and "text" in form and form["text"].value != None and len(form["text"].value.strip()) != 0 :
@@ -220,14 +244,11 @@ def extract_rdf(uri, form) :
 			retval +="<dt>Uploaded file</dt>\n"
 		else :
 			retval +="<dt>URI received:</dt><dd><code>'%s'</code></dd>\n" % cgi.escape(uri)
-		if host_language :
-			retval +="<dt>Media Type:</dt><dd>%s</dd>\n" % media_type
-		if "graph" in list(form.keys()) :
-			retval +="<dt>Requested graphs:</dt><dd>%s</dd>\n" % form.getfirst("graph").lower()
-		else :
-			retval +="<dt>Requested graphs:</dt><dd>default</dd>\n"
-		retval +="<dt>Output serialization format:</dt><dd> %s</dd>\n" % outputFormat
-		if "space_preserve" in form : retval +="<dt>Space preserve:</dt><dd> %s</dd>\n" % form["space_preserve"].value
+		if form_values.host_language :
+			retval +="<dt>Media Type:</dt><dd>%s</dd>\n" % form_values.media_type
+		retval += "<dt>Requested graphs:</dt><dd>%s</dd>\n" % (graph_choice if graph_choice is not None else "default")
+		retval +="<dt>Output serialization format:</dt><dd>%s</dd>\n" % form_values.output_format
+		retval +="<dt>Space preserve:</dt><dd>%s</dd>\n" % form_values.space_preserve
 		retval +="</dl>\n"
 		retval +="</body>\n"
 		retval +="</html>\n"

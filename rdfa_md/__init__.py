@@ -15,7 +15,7 @@ from .rdfa import extract_rdf
 #########################################################################################
 #  Helper functions to pre-process and check the incoming form data
 #########################################################################################
-def err_message(msg) :
+def err_message(uri, msg) :
 	"""Return an error message in HTTP/HTML and exit the script"""
 	from .cleanhtml import clean_print
 	print('Content-type: text/html; charset=utf-8')
@@ -54,13 +54,13 @@ def brett_test(uri) :
 	try:
 		check_url_safety(uri)
 	except HTTPError as e:
-		err_message('HTTP Error with the error code: %s and the error message: "%s"' (e.code, e.reason))
+		err_message(uri, 'HTTP Error with the error code: %s and the error message: "%s"' (e.code, e.reason))
 	except URLError as e:
-		err_message('URL Error with the error message: "%s"' % e.reason)
+		err_message(uri, 'URL Error with the error message: "%s"' % e.reason)
 	except UnsupportedResourceError as e:
 		msg = e.args[0] + ": " + e.args[1]
-		err_message('Unsupported Resource Error with the error message "%s"' % msg)
+		err_message(uri, 'Unsupported Resource Error with the error message "%s"' % msg)
 	except Exception as e:
 		l = len(e.args)
 		msg = "" if l == 0 else (e.args[0] if l == 1 else repr(e.args))
-		err_message('Exception raised: "%s"' % msg)
+		err_message(uri, 'Exception raised: "%s"' % msg)

@@ -126,7 +126,7 @@ def process_input(form):
 		except Exception as e :
 			l = len(e.args)
 			msg = "" if l == 0 else (e.args[0] if l == 1 else repr(e.args))
-			err_message('Exception raised: "%s"' % msg)
+			err_message(uri, 'Exception raised: "%s"' % msg)
 
 
 
