@@ -50,12 +50,14 @@ class FormValues(object):
 	 - C{vocab_cache_report=[true|false]} : whether vocab caching details should be reported. Default: C{false}
 	 - C{vocab_cache_bypass=[true|false]} : whether vocab caches have to be regenerated every time. Default: C{false}
 	 - C{rdfa_lite=[true|false]} : whether warnings should be generated for non RDFa Lite attribute usage. Default: C{false}
+	 - C{rdfa_version=["1.1"|"1.0"]} : RDFa version. If missing, set to 1.1.
 	"""
 	def __init__(self, form):
 		self.form = form
 		self.keys = list(form.keys())
 		self.host_language		 = self.get_value("host_language")
 		self.media_type          = self._get_media_type()
+		self.rdfa_version		 = self.get_value("rdfa_version", "1.1")
 		self.check_lite          = (self.get_value("rdfa_lite") == "true")
 		self.embedded_rdf        = self.check_option("embedded_rdf", "true", False)
 		self.space_preserve      = self.check_option("space_preserve", "true", True)
@@ -63,9 +65,7 @@ class FormValues(object):
 		self.vocab_cache_report  = self.check_option("vocab_cache_report", "true", False)
 		self.refresh_vocab_cache = self.check_option("vocab_cache_refresh", "true", False)
 		self.vocab_expansion     = self.check_option("vocab_expansion", "true", False)
-		self.output_format       = self.get_value("format")
-		if self.output_format is None:
-			self.output_format = "turtle"
+		self.output_format       = self.get_value("format", "turtle")
 
 	def _get_media_type(self):
 		if self.host_language is None:
@@ -82,9 +82,9 @@ class FormValues(object):
 			media_type = MediaTypes.xml
 		return media_type
 
-	def get_value(self, key):
+	def get_value(self, key, default = None):
 		"""Get a value if exists, None otherwise"""
-		return self.form.getfirst(key).lower() if key in self.keys else None
+		return self.form.getfirst(key).lower() if key in self.keys else default
 
 	def get_value2(self, key1, key2):
 		"""Get one of two options, in priority order, None if neither is present"""
@@ -133,16 +133,16 @@ def extract_rdf(uri, form) :
 	form_values = FormValues(form)
 
 	# Collect the data, depending on what mechanism is used in the form
-	(input, base) = form_values.get_source_and_base(uri)
+	input, base = form_values.get_source_and_base(uri)
 
 	# Decide which graphs should be sent back
 	graph_choice = form_values.get_value2("rdfagraph", "graph")
 	if graph_choice == "processor":
-		(output_default_graph, output_processor_graph) = (False, True)
+		output_default_graph, output_processor_graph = False, True
 	elif graph_choice == "processor,output" or graph_choice == "output,processor":
-		(output_default_graph, output_processor_graph) = (True, True)
+		output_default_graph, output_processor_graph = True, True
 	else:
-		(output_default_graph, output_processor_graph) = (True, False)
+		output_default_graph, output_processor_graph = True, False
 
 	# These values may be overridden in one case...
 	if form_values.vocab_cache_report : output_processor_graph = True
@@ -162,7 +162,8 @@ def extract_rdf(uri, form) :
 					   vocab_cache         = form_values.vocab_cache,
 					   refresh_vocab_cache = form_values.refresh_vocab_cache,
 					   vocab_cache_report  = form_values.vocab_cache_report,
-					   check_lite          = form_values.check_lite
+					   check_lite          = form_values.check_lite,
+					   rdfa_version        = form_values.rdfa_version
 					   )
 
 	# Next step is to create the final graph to be returned to the user; this depends on
