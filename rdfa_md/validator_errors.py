@@ -42,34 +42,34 @@ class Errors :
 		self.error_graph	= validator.processor_graph
 		self.validator		= validator
 
-	def _add_element_and_string(self, parent, element, str, **attrs) :
+	def _add_element_and_string(self, parent, element, text, **attrs) :
 		"""
 		Helper method: add a DOM element to the parent (unless element == "") and add a text node to the results
 		@param parent: where to add the content
 		@type parent: DOM Element Node
 		@param element: element name for the new node; if "", this is skipped
 		@type element: string
-		@param str: text to add as a text node
+		@param text: text to add as a text node
 		@param attrs: key value pairs for attributes to be added to the new element
 		"""
 		if element != "" :
 			e = self.domtree.createElement(element)
-			for key in list(attrs.keys()) :
-				e.setAttribute(key,"%s" % attrs[key])
-			e.appendChild(self.domtree.createTextNode(str))
+			for key in attrs :
+				e.setAttribute(key, "%s" % attrs[key])
+			e.appendChild(self.domtree.createTextNode(text))
 			parent.appendChild(e)
 		else :
-			parent.appendChild(self.domtree.createTextNode(str))
+			parent.appendChild(self.domtree.createTextNode(text))
 
-	def _add_string(self, str, element = "p") :
+	def _add_string(self, text, element = "p") :
 		"""
 		Helper method: add a DOM element to the error block (unless element == "") and add a text node to the results
 		@param element: element name for the new node; if "", this is skipped
 		@type element: string
-		@param str: text to add as a text node
+		@param text: text to add as a text node
 		@param attrs: key value pairs for attributes to be added to the new element
 		"""
-		self._add_element_and_string(self.target,element,str)
+		self._add_element_and_string(self.target, element, text)
 
 	def header(self, e,w,i) :
 		"""
@@ -83,37 +83,38 @@ class Errors :
 		@type i: integer
 		"""
 		if e != 0 :
-			if e == 1 : error = "is one error "
+			if e == 1 :  error = "is one error "
 			elif e > 1 : error = "are %s errors " % e
 
 			if i + w > 0 :
 				if w > 0 :
 					if w == 1 : warning = "one warning"
 					else :      warning = "%s warnings" % w
-					if i == 0 : info = ""
+
+					if i == 0 :  info = ""
 					elif i== 1 : info = " plus one informational message"
-					else :      info = " plus %s informational messages" % i
-					str = "There %s (and %s%s) in your RDFa content" % (error,warning,info)
+					else :       info = " plus %s informational messages" % i
+					text = "There %s (and %s%s) in your RDFa content" % (error, warning, info)
 				else :
-					if i == 0 : info = ""
+					if i == 0 :   info = ""
 					elif i == 1 : info = "(and one informational message)"
-					else :      info = "(and %s informational messages)" % i
-					str = "There %s %s in your RDFa content" % (error,info)
+					else :        info = "(and %s informational messages)" % i
+					text = "There %s %s in your RDFa content" % (error, info)
 			else :
-				str = "There " + error + "in your RDFa content"
+				text = "There " + error + "in your RDFa content"
 		else :
 			if w > 0 :
 				if w == 1 : warning = "is one warning"
 				else :      warning = "are %s warnings" % w
-				if i == 0 : info = ""
+				if i == 0 : info  = ""
 				elif i== 1 : info = " and one informational message"
-				else :      info = " and %s informational messages" % i
-				str = "Congratulations, your RDFa source is valid; however there %s %s in your RDFa content that you might want to check" % (warning,info)
+				else :      info  = " and %s informational messages" % i
+				text = "Congratulations, your RDFa source is valid; however there %s %s in your RDFa content that you might want to check" % (warning, info)
 			else :
 				if i == 1 : info = "is one informational message"
 				else :      info = "are %s informational messages" % i
-				str = "Congratulations, your RDFa source is valid; however there %s in your RDFa content that you might want to check" % info
-		self._add_string(str)
+				text = "Congratulations, your RDFa source is valid; however there %s in your RDFa content that you might want to check" % info
+		self._add_string(text)
 
 	def one_message(self, subj, header) :
 		"""
@@ -122,12 +123,12 @@ class Errors :
 		@type subj: RDFLib URIRef or BNode
 		@param header: one of "Error", "Warning", or "Info", added to the final message's span as a class name, used for CSS
 		"""
-		for (x,y,desc) in self.error_graph.triples((subj,ns_dc["description"],None)) :
+		for (x, y, desc) in self.error_graph.triples((subj, ns_dc["description"], None)) :
 			p = self.domtree.createElement("p")
 			self.target.appendChild(p)
 			p.setAttribute("class", header)
-			self._add_element_and_string(p,"span", header)
-			self._add_element_and_string(p,"",": ")
+			self._add_element_and_string(p, "span", header)
+			self._add_element_and_string(p, "", ": ")
 			self._add_element_and_string(p, "span", desc)
 
 	def messages(self, title, msgs, header) :
@@ -149,11 +150,12 @@ class Errors :
 		to_sort = []
 		for subj in arr :
 			date = ""
-			for (x,y,date) in self.error_graph.triples((subj, ns_dc["date"], None)) :
+			for (x, y, date) in self.error_graph.triples((subj, ns_dc["date"], None)) :
 				break
 			to_sort.append((subj,date))
+		# TODO: This must be reviewed for Python3
 		to_sort.sort(cmp = lambda x,y : cmp(x[1],y[1]))
-		return [subj for (subj,obj) in to_sort]
+		return [subj for (subj, obj) in to_sort]
 
 	def interpret(self) :
 		"""
@@ -174,7 +176,7 @@ class Errors :
 			_add_info()
 			return
 
-		self.header(len(errors),len(warnings),len(infos))
+		self.header(len(errors), len(warnings), len(infos))
 		_add_info()
 
 		if len(errors) != 0 :

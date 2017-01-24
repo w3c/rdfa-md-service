@@ -35,7 +35,7 @@ else :
 	os.environ['PyRdfaCacheDir'] = '/usr/local/apache/cgi/cgi-bin-other/RDFa/data-local'
 	cgitb.enable(display=0, logdir="/home/nobody/tracebacks/")
 
-from rdfa_md import extract_rdf, err_message, brett_test
+from rdfa_md import extract_rdf, validate_rdfa, err_message, brett_test
 
 
 def uri_test(uri) :
@@ -96,37 +96,28 @@ def process_input(form):
 
 	# If we got here, we should have the data hidden, in some way or other, behind the form data
 	# and/or the URI
-	if "validate" in form  :
-		# This is to be handled later... now concentrate on the parser part
-		from rdfavalidator import validateURI
-		if not (uri == 'text:' or uri == 'uploaded:') :
-			uri_test(uri)
-		print('Content-Type: text/html; charset=utf-8')
-		print("")
-		print(validateURI(uri, form))
-	else :
-		try :
-			# Thanks to Sergio and Diego for the idea and code for the referer branch
-			if uri == "referer" :
-				uri = os.getenv('HTTP_REFERER')
-				if uri is None:
-					newuri = "http://www.w3.org/2012/pyRdfa/no_referer.html"
-				else:
-					uri_test(uri)
-					newuri = "http://www.w3.org/2012/pyRdfa/extract?uri=" + uri
-				print("Status: 307 Moved Temporarily")
-				print("Location: " + newuri)
-				print("")
-			else :
-				# last point of check: use Brett's script to check the validity of the URI
-				if not (uri == 'text:' or uri == 'uploaded:') :
-					uri_test(uri)
+	try :
+		# Thanks to Sergio and Diego for the idea and code for the referer branch
+		if uri == "referer" :
+			uri = os.getenv('HTTP_REFERER')
+			if uri is None:
+				newuri = "http://www.w3.org/2012/pyRdfa/no_referer.html"
+			else:
+				uri_test(uri)
+				newuri = "http://www.w3.org/2012/pyRdfa/extract?uri=" + uri
+			print("Status: 307 Moved Temporarily")
+			print("Location: " + newuri)
+			print("")
+		else :
+			# last point of check: use Brett's script to check the validity of the URI
+			if not (uri == 'text:' or uri == 'uploaded:') :
+				uri_test(uri)
 
-				print(extract_rdf(uri, form))
-		except Exception as e :
-			l = len(e.args)
-			msg = "" if l == 0 else (e.args[0] if l == 1 else repr(e.args))
-			err_message(uri, 'Exception raised: "%s"' % msg)
+			print( validate_rdfa(uri, form) if "validate" in form else extract_rdf(uri, form) )
+	except Exception as e :
+		l = len(e.args)
+		msg = "" if l == 0 else (e.args[0] if l == 1 else repr(e.args))
+		err_message(uri, 'Exception raised: "%s"' % msg)
 
 
 

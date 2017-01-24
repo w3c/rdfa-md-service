@@ -12,7 +12,7 @@ Validation means to extract the RDFa content, using the same parser, and examini
 Dependencies within the module:
 	- RDF Extraction: None
 	- RDFa Validation:
-		- errors.py: working through the error triples to produce proper output
+		- validator_errors.py: working through the error triples to produce proper output
 		- validator_html.py: a single HTML template to be used for the generated output
 
 """
@@ -30,6 +30,7 @@ else :
 
 from rdflib import Graph
 from rdflib.plugins.parsers.pyRdfa.host import MediaTypes
+from .validator import Validator
 
 #############################################################################################
 # Common class to handle the (CGI) form object values
@@ -254,3 +255,69 @@ def extract_rdf(uri, form) :
 		retval +="</body>\n"
 		retval +="</html>\n"
 		return retval
+
+
+#########################################################################################
+# RDFa Validation:  use the RDFLib parser to extract the RDF graph, serialize it and
+# The rough order of working:
+# - generate the default and the processor graphs via the distiller
+# - take the HTML code template in L{html_page}
+# - expand the DOM tree of that template by (a) generate a list of errors and warnings in HTML and (b) add the generated code
+# - serialize the HTML page as an output to the CGI call
+#########################################################################################
+
+def validate_rdfa(uri, form={}) :
+	"""The standard processing of an RDFa uri options in a form, ie, as an entry point from a CGI call. For compatibility
+	reasons with the RDFa 1.1 distiller (the same CGI entry point is used for both) the form's content may include a number
+	of entries that this function ignores.
+
+	The call accepts the following extra form option (eg, HTTP GET options):
+
+	 - C{host_language=[xhtml,html,xml]} : the host language. Used when files are uploaded or text is added verbatim, otherwise the HTTP return header shoudl be used
+
+	@param uri: URI to access. Note that the "text:" and "uploaded:" values are treated separately; the former is for textual intput (in which case a StringIO is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
+	@param form: extra call options (from the CGI call) to set up the local options
+	@type form: cgi FieldStorage instance
+	@return: serialized HTML content
+	@rtype: string
+	"""
+	form_values = FormValues(form)
+	# Collect the data, depending on what mechanism is used in the form
+	input, base = form_values.get_source_and_base(uri)
+	validator = Validator(input, base,
+							media_tupe      = form_values.media_type,
+							vocab_expansion = form_values.vocab_expansion,
+							rdfa_lite       = form_values.rdfa_lite,
+							embedded_rdf    = form_values.embedded_rdf)
+
+	try :
+		header = 'Content-type: text/html; charset=utf-8\n'
+		return header + "\n" + validator.run()
+	except :
+		# This branch should occur only if an exception is really raised, ie, if it is not turned
+		# into a graph value.
+		import traceback, cgi
+		print( "<html>" )
+		print( "<head>" )
+		print( "<title>Error in RDFa validation processing</title>" )
+		print( "</head><body>" )
+		print( "<h1>Error in RDFa validation processing</h1>" )
+		print( "<pre>" )
+		strio  = StringIO()
+		traceback.print_exc(file=strio)
+		print(strio.getvalue())
+		print( "</pre>" )
+		print( "<pre>%s</pre>" % value )
+		print( "<h1>Validator request details</h1>" )
+		print( "<dl>" )
+		if uri == "text:" and "text" in form and form["text"].value != None and len(form["text"].value.strip()) != 0 :
+			print( "<dt>Text input:</dt><dd>%s</dd>" % cgi.escape(form["text"].value).replace('\n','<br/>') )
+		elif uri == "uploaded:" :
+			print( "<dt>Uploaded file</dt>" )
+		else :
+			print( "<dt>URI received:</dt><dd><code>'%s'</code></dd>" % cgi.escape(uri) )
+		if "host_language" in form.keys() :
+			print( "<dt>Media Type:</dt><dd>%s</dd>" % form_values.media_type )
+		print( "</dl>" )
+		print( "</body>" )
+		print( "</html>" )
