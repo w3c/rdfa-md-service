@@ -64,8 +64,6 @@ html_page = """<?xml version="1.0" encoding="UTF-8"?>
 
         <hr />
         <address>
-		    <a href="http://www.w3.org/People/Ivan/">Ivan Herman</a> (<a href="mailto:ivan@w3.org">ivan@w3.org</a>)
-			<br />
 			%s
 		</address>
   </body>

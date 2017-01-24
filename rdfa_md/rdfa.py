@@ -106,9 +106,9 @@ class FormValues(object):
 		in some cases, it may return to the embedded data in the form"""
 		# Collect the data, depending on what mechanism is used in the form
 		if uri == "uploaded:" :
-			return (form["uploaded"].file, "")
+			return (self.form["uploaded"].file, "")
 		elif uri == "text:" :
-			return (StringIO(form.getfirst("text")), "")
+			return (StringIO(self.form.getfirst("text")), "")
 			base	= ""
 		else :
 			return (uri,uri)
@@ -152,31 +152,31 @@ def extract_rdf(uri, form) :
 	output_graph    = Graph()
 	processor_graph = Graph()
 
-	# This is the real meat: calling out to the RDFa parser.
-	output_graph.parse(input,
-					   format              = "rdfa",
-					   pgraph              = processor_graph,
-					   media_type          = form_values.media_type,
-					   embedded_rdf        = form_values.embedded_rdf,
-					   space_preserve      = form_values.space_preserve,
-					   vocab_expansion     = form_values.vocab_expansion,
-					   vocab_cache         = form_values.vocab_cache,
-					   refresh_vocab_cache = form_values.refresh_vocab_cache,
-					   vocab_cache_report  = form_values.vocab_cache_report,
-					   check_lite          = form_values.check_lite,
-					   rdfa_version        = form_values.rdfa_version
-					   )
-
-	# Next step is to create the final graph to be returned to the user; this depends on
-	# whether the which graphs are required.
-	final_graph = Graph()
-	if output_default_graph :
-		for t in output_graph : final_graph.add(t)
-	if output_processor_graph :
-		for t in processor_graph : final_graph.add(t)
-
 	# The graph is serialized in the required format, and returned
 	try :
+		# This is the real meat: calling out to the RDFa parser.
+		output_graph.parse(input,
+						   format              = "rdfa",
+						   pgraph              = processor_graph,
+						   media_type          = form_values.media_type,
+						   embedded_rdf        = form_values.embedded_rdf,
+						   space_preserve      = form_values.space_preserve,
+						   vocab_expansion     = form_values.vocab_expansion,
+						   vocab_cache         = form_values.vocab_cache,
+						   refresh_vocab_cache = form_values.refresh_vocab_cache,
+						   vocab_cache_report  = form_values.vocab_cache_report,
+						   check_lite          = form_values.check_lite,
+						   rdfa_version        = form_values.rdfa_version
+						   )
+
+		# Next step is to create the final graph to be returned to the user; this depends on
+		# whether the which graphs are required.
+		final_graph = Graph()
+		if output_default_graph :
+			for t in output_graph : final_graph.add(t)
+		if output_processor_graph :
+			for t in processor_graph : final_graph.add(t)
+
 		# "header" collects the HTTP response; first the header with the content type,
 		# then the real data
 		if form_values.output_format == "nt" :
@@ -207,55 +207,12 @@ def extract_rdf(uri, form) :
 		# Extra empty line to end the HTTP response header
 		return header + "\n" + final_graph.serialize(format=format)
 	except HTTPError:
-		(type,h,traceback) = sys.exc_info()
-		retval =  'Status: 400 Invalid Input\n'
-		retval += 'Content-type: text/html; charset=utf-8\nStatus: %s \n\n' % h.http_code
-		retval += "<html>\n"
-		retval += "<head>\n"
-		retval += "<title>HTTP Error in distilling RDFa content</title>\n"
-		retval += "</head><body>\n"
-		retval += "<h1>HTTP Error in distilling RDFa content</h1>\n"
-		retval += "<p>HTTP Error: %s (%s)</p>\n" % (h.http_code,h.msg)
-		retval += "<p>On URI: <code>'%s'</code></p>\n" % cgi.escape(uri)
-		retval +="</body>\n"
-		retval +="</html>\n"
-		return retval
+		from . import handle_http_exception
+		return handle_http_exception(uri, "HTTP Error in distilling RDFa content")
 	except Exception as e:
-		# This branch should occur only if an exception is really raised, ie, if it is not turned
-		# into a graph value.
-		import traceback
-		retval =  'Status: 400 Invalid Input\n'
-		retval += 'Content-type: text/html; charset=utf-8\n'
-		retval += 'Status: %s\n' % 400
-		retval += '\n'
-		retval += "<html>\n"
-		retval += "<head>\n"
-		retval += "<title>Exception in RDFa processing</title>\n"
-		retval += "</head><body>\n"
-		retval += "<h1>Exception in distilling RDFa</h1>\n"
-		retval += "<pre>\n"
-		strio  = StringIO()
-		traceback.print_exc(file=strio)
-		retval += strio.getvalue()
-		retval +="</pre>\n"
-		retval +="<h1>Distiller request details</h1>\n"
-		retval +="<dl>\n"
-		if uri == "text:" and "text" in form and form["text"].value != None and len(form["text"].value.strip()) != 0 :
-			retval +="<dt>Text input:</dt><dd>%s</dd>\n" % cgi.escape(form["text"].value).replace('\n','<br/>')
-		elif uri == "uploaded:" :
-			retval +="<dt>Uploaded file</dt>\n"
-		else :
-			retval +="<dt>URI received:</dt><dd><code>'%s'</code></dd>\n" % cgi.escape(uri)
-		if form_values.host_language :
-			retval +="<dt>Media Type:</dt><dd>%s</dd>\n" % form_values.media_type
-		retval += "<dt>Requested graphs:</dt><dd>%s</dd>\n" % (graph_choice if graph_choice is not None else "default")
-		retval +="<dt>Output serialization format:</dt><dd>%s</dd>\n" % form_values.output_format
-		retval +="<dt>Space preserve:</dt><dd>%s</dd>\n" % form_values.space_preserve
-		retval +="</dl>\n"
-		retval +="</body>\n"
-		retval +="</html>\n"
-		return retval
-
+		from . import handle_general_exception
+		return handle_general_exception(uri, "Exception in distilling RDFa", form_values,
+		                                graph_choice = graph_choice, extracts = True )
 
 #########################################################################################
 # RDFa Validation:  use the RDFLib parser to extract the RDF graph, serialize it and
@@ -284,41 +241,19 @@ def validate_rdfa(uri, form={}) :
 	form_values = FormValues(form)
 	# Collect the data, depending on what mechanism is used in the form
 	input, base = form_values.get_source_and_base(uri)
-	validator = Validator(input, base,
-							media_type      = form_values.media_type,
-							vocab_expansion = form_values.vocab_expansion,
-							check_lite      = form_values.check_lite,
-							embedded_rdf    = form_values.embedded_rdf)
-
 	try :
+		validator = Validator(input, base,
+								media_type      = form_values.media_type,
+								vocab_expansion = form_values.vocab_expansion,
+								check_lite      = form_values.check_lite,
+								embedded_rdf    = form_values.embedded_rdf)
+
 		header = 'Content-type: text/html; charset=utf-8\n'
-		# return header + "\n" + "<html><body><p>YKYDKDKHGF</p></body></html>"
 		return header + "\n" + validator.run()
+	except HTTPError:
+		from . import handle_http_exception
+		return handle_http_exception(uri, "HTTP Error in RDFa validation processing")
 	except :
-		# This branch should occur only if an exception is really raised, ie, if it is not turned
-		# into a graph value.
-		import traceback, cgi
-		print( "<html>" )
-		print( "<head>" )
-		print( "<title>Error in RDFa validation processing</title>" )
-		print( "</head><body>" )
-		print( "<h1>Error in RDFa validation processing</h1>" )
-		print( "<pre>" )
-		strio  = StringIO()
-		traceback.print_exc(file=strio)
-		print(strio.getvalue())
-		print( "</pre>" )
-		print( "<pre>%s</pre>" % value )
-		print( "<h1>Validator request details</h1>" )
-		print( "<dl>" )
-		if uri == "text:" and "text" in form and form["text"].value != None and len(form["text"].value.strip()) != 0 :
-			print( "<dt>Text input:</dt><dd>%s</dd>" % cgi.escape(form["text"].value).replace('\n','<br/>') )
-		elif uri == "uploaded:" :
-			print( "<dt>Uploaded file</dt>" )
-		else :
-			print( "<dt>URI received:</dt><dd><code>'%s'</code></dd>" % cgi.escape(uri) )
-		if "host_language" in form.keys() :
-			print( "<dt>Media Type:</dt><dd>%s</dd>" % form_values.media_type )
-		print( "</dl>" )
-		print( "</body>" )
-		print( "</html>" )
+		from . import handle_general_exception
+		return handle_general_exception(uri, "Error in RDFa validation processing", form_values,
+		                                graph_choice = "", extracts = False )

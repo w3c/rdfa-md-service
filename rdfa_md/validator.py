@@ -19,14 +19,11 @@ from datetime import date
 
 from rdflib import Graph
 from rdflib.plugins.parsers.pyRdfa.host    import MediaTypes
-
 from rdflib.plugins.parsers.pyRdfa         import pyRdfa
-from rdflib.plugins.parsers.pyRdfa.options import MediaTypes, Options
+from rdflib.plugins.parsers.pyRdfa.options import Options
 
-from rdfa_md.validator_html	import html_page
-from rdfa_md.validator_errors  import Errors
-# from .validator_html	import html_page
-# from .validator_errors  import Errors
+from .validator_html	import html_page
+from .validator_errors  import Errors
 
 class Validator :
 	"""
@@ -87,6 +84,14 @@ class Validator :
 		"""
 		Parse the RDFa input and store the processor and default graphs. The final media type is also updated.
 		"""
+		#
+		# The reason why we have to go down the 'guts' of the RDFa parser plugin is in the
+		# RDFa lite checking below. What that extra 'transformer' does in the parser is to
+		# add RDFa Lite specific triples into the processor graph which is used to generate
+		# the relevant warning. If that step was not used or necessary, we could remain on the
+		# "user" level and simply use the 'official' parsing of the incoming data.
+		# Oh well...
+		#
 		transformers = []
 		if self.check_lite :
 			from rdflib.plugins.parsers.pyRdfa.transform.lite import lite_prune

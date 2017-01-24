@@ -27,12 +27,14 @@ if sys.platform == "darwin" :
 	# this is my local machine
 	sys.path.insert(0,"/Users/ivan/Library/Python")
 	os.environ['PyRdfaCacheDir'] = '/Users/ivan/.pyrdfa-cache'
+	running_at_w3c = False
 	cgitb.enable()
 else :
 	# this is the server on W3C
 	sys.path.insert(0,"/usr/local/lib/python2.4/site-packages/PythonLib-IH")
 	sys.path.insert(0,"/usr/local/lib/python2.4/site-packages/PythonLib-IH/rdfa-1.1")
 	os.environ['PyRdfaCacheDir'] = '/usr/local/apache/cgi/cgi-bin-other/RDFa/data-local'
+	running_at_w3c = True
 	cgitb.enable(display=0, logdir="/home/nobody/tracebacks/")
 
 from rdfa_md import extract_rdf, validate_rdfa, err_message, brett_test
@@ -42,10 +44,11 @@ def uri_test(uri) :
 	"""Testing, when running on W3C, the safety of the URL.
 	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.
 
+	If this test reveals any problem, the script exits!!!
+
 	@param uri: the URI to be checked.
 	"""
-	if not sys.platform == "darwin" : brett_test(uri)
-
+	if running_at_w3c and not brett_test(uri): sys.exit(1)
 
 def process_input(form):
 	"""Pre-rocess the form data. If all checking and processing is fine, call out to processURI
@@ -110,8 +113,8 @@ def process_input(form):
 			print("")
 		else :
 			# last point of check: use Brett's script to check the validity of the URI
-			if not (uri == 'text:' or uri == 'uploaded:') :
-				uri_test(uri)
+			# Note that if the test reveals any problems, the script returns a message and exists
+			if not (uri == 'text:' or uri == 'uploaded:') : uri_test(uri)
 
 			print( validate_rdfa(uri, form) if "validate" in form else extract_rdf(uri, form) )
 	except Exception as e :
