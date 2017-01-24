@@ -153,8 +153,9 @@ class Errors :
 			for (x, y, date) in self.error_graph.triples((subj, ns_dc["date"], None)) :
 				break
 			to_sort.append((subj,date))
-		# TODO: This must be reviewed for Python3
-		to_sort.sort(cmp = lambda x,y : cmp(x[1],y[1]))
+		to_sort.sort(key = lambda x: x[1])
+		# This was the Python2 version...
+		# to_sort.sort(cmp = lambda x,y : cmp(x[1],y[1]))
 		return [subj for (subj, obj) in to_sort]
 
 	def interpret(self) :
