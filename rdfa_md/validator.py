@@ -21,10 +21,12 @@ from rdflib import Graph
 from rdflib.plugins.parsers.pyRdfa.host    import MediaTypes
 
 from rdflib.plugins.parsers.pyRdfa         import pyRdfa
-from rdflib.plugins.parsers.pyRdfa.options import MediaTypes
+from rdflib.plugins.parsers.pyRdfa.options import MediaTypes, Options
 
-from .validator_html	import html_page
-from .validator_errors  import Errors
+from rdfa_md.validator_html	import html_page
+from rdfa_md.validator_errors  import Errors
+# from .validator_html	import html_page
+# from .validator_errors  import Errors
 
 class Validator :
 	"""
@@ -35,7 +37,7 @@ class Validator :
 	@ivar base: base value for the generated RDF output
 	@ivar media_type: media type of the source
 	@ivar vocab_expansion: whether vocabulary expansion should occur or not
-	@ivar rdfa_lite: whether RDFa 1.1 Lite should be checked
+	@ivar check_lite: whether RDFa 1.1 Lite should be checked
 	@ivar hturtle: whether the embedded turtle should be included in the output
 	@ivar domtree: the Document Node of the final domtree where the final HTML code should be added
 	@ivar message: the Element Node in the final DOM Tree where the error/warning messages should be added
@@ -43,7 +45,7 @@ class Validator :
 	@ivar errors: separate class instance to generate the error code
 	@type errors: L{Errors}
 	"""
-	def __init__(self, uri, base, media_type = "", vocab_expansion = False, rdfa_lite = False, embedded_rdf = False) :
+	def __init__(self, uri, base, media_type = "", vocab_expansion = False, check_lite = False, embedded_rdf = False) :
 		"""
 		@param uri: the URI for the content to be analyzed
 		@type uri: file-like object (e.g., when content goes through an HTTP Post) or a string
@@ -59,16 +61,19 @@ class Validator :
 		self.base			 = base
 		self.media_type		 = media_type
 		self.embedded_rdf	 = embedded_rdf
-		self.rdfa_lite		 = rdfa_lite
+		self.check_lite		 = check_lite
 		self.vocab_expansion = vocab_expansion
+
 
 		# Get the DOM tree that will be the scaffold for the output
 		self.domtree = xml.dom.minidom.parse(StringIO(html_page % date.today().isoformat()))
+
 		# find the warning/error content
 		for div in self.domtree.getElementsByTagName("div") :
 			if div.hasAttribute("id") and div.getAttribute("id") == "Message" :
 				self.message = div
 				break
+
 		# find the turtle output content
 		for pre in self.domtree.getElementsByTagName("pre") :
 			if pre.hasAttribute("id") and pre.getAttribute("id") == "output" :
@@ -83,7 +88,7 @@ class Validator :
 		Parse the RDFa input and store the processor and default graphs. The final media type is also updated.
 		"""
 		transformers = []
-		if self.rdfa_lite :
+		if self.check_lite :
 			from rdflib.plugins.parsers.pyRdfa.transform.lite import lite_prune
 			transformers.append(lite_prune)
 
@@ -116,3 +121,10 @@ class Validator :
 		self.parse()
 		self.complete_DOM()
 		return self.domtree.toxml(encoding="utf-8")
+
+if __name__ == '__main__':
+	sys.path.insert(0,"/Users/ivan/Library/Python")
+
+	validator = Validator("https://www.ivan-herman.net/AboutMe.html", base = "")
+	r = validator.run()
+	print(r)

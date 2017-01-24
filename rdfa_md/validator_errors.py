@@ -163,7 +163,7 @@ class Errors :
 		and displays the generated message strings in three different categories.
 		"""
 		def _add_info() :
-			if self.validator.rdfa_lite :
+			if self.validator.check_lite :
 				self._add_string("(Checked RDFa %s Lite, with %s as host language.)" % (self.validator.processor.rdfa_version, self.validator.processor.options.host_language))
 			else :
 				self._add_string("(Checked RDFa %s, with %s as host language.)" % (self.validator.processor.rdfa_version, self.validator.processor.options.host_language))

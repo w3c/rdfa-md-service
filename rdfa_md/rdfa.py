@@ -285,13 +285,14 @@ def validate_rdfa(uri, form={}) :
 	# Collect the data, depending on what mechanism is used in the form
 	input, base = form_values.get_source_and_base(uri)
 	validator = Validator(input, base,
-							media_tupe      = form_values.media_type,
+							media_type      = form_values.media_type,
 							vocab_expansion = form_values.vocab_expansion,
-							rdfa_lite       = form_values.rdfa_lite,
+							check_lite      = form_values.check_lite,
 							embedded_rdf    = form_values.embedded_rdf)
 
 	try :
 		header = 'Content-type: text/html; charset=utf-8\n'
+		# return header + "\n" + "<html><body><p>YKYDKDKHGF</p></body></html>"
 		return header + "\n" + validator.run()
 	except :
 		# This branch should occur only if an exception is really raised, ie, if it is not turned

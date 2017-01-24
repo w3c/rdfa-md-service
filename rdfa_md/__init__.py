@@ -10,7 +10,7 @@ __author__  = 'Ivan Herman'
 __contact__ = 'Ivan Herman, ivan@w3.org'
 __license__ = 'W3C® SOFTWARE NOTICE AND LICENSE, https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document'
 
-from .rdfa import extract_rdf
+from .rdfa import extract_rdf, validate_rdfa
 
 #########################################################################################
 #  Helper functions to pre-process and check the incoming form data
