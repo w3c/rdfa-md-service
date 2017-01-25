@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rdfa_md.__init__ &mdash; RDFa and Microdata Services—Documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="RDFa and Microdata Services—Documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../../index.html">
+          <span>RDFa and Microdata Services—Documentation</span></a></h1>
+        <h2 class="heading"><span>rdfa_md.__init__</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        <a class="uplink" href="../../index.html">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <h1>Source code for rdfa_md.__init__</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Maintainer: Ivan Herman &lt;ivan@w3.org&gt;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
+<span class="n">__author__</span>  <span class="o">=</span> <span class="s1">&#39;Ivan Herman&#39;</span>
+<span class="n">__contact__</span> <span class="o">=</span> <span class="s1">&#39;Ivan Herman, ivan@w3.org&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;W3C® SOFTWARE NOTICE AND LICENSE, https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document&#39;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">PY3</span> <span class="o">=</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+	<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+	<span class="kn">from</span> <span class="nn">urllib.error</span> <span class="kn">import</span> <span class="n">HTTPError</span>
+<span class="k">else</span> <span class="p">:</span>
+	<span class="kn">from</span> <span class="nn">StringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+	<span class="kn">from</span> <span class="nn">urllib2</span> <span class="kn">import</span> <span class="n">HTTPError</span>
+
+<span class="kn">from</span> <span class="nn">.rdfa</span>  <span class="kn">import</span> <span class="n">extract_rdf</span><span class="p">,</span> <span class="n">validate_rdfa</span>
+<span class="kn">from</span> <span class="nn">.mdata</span> <span class="kn">import</span> <span class="n">extract_microdata</span>
+<span class="kn">import</span> <span class="nn">traceback</span><span class="o">,</span> <span class="nn">cgi</span>
+
+
+<span class="c1">#########################################################################################</span>
+<span class="c1">#  Helper functions to pre-process and check the incoming form data; used by the CGI scripts</span>
+<span class="c1">#########################################################################################</span>
+<div class="viewcode-block" id="err_message"><a class="viewcode-back" href="../../init.html#rdfa_md.__init__.err_message">[docs]</a><span class="k">def</span> <span class="nf">err_message</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Return an error message in HTTP/HTML and exit the script. This is called on the topmost</span>
+<span class="sd">	CGI level, not once the extraction/validation has started.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="kn">from</span> <span class="nn">.cleanhtml</span> <span class="kn">import</span> <span class="n">clean_print</span>
+	<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Content-type: text/html; charset=utf-8&#39;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Status: 400 Invalid Input&#39;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;html&gt;&quot;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;head&gt;&quot;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;title&gt;Error in RDFa processing&lt;/title&gt;&quot;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/head&gt;&lt;body&gt;&quot;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;h1&gt;Error in distilling RDFa&lt;/h1&gt;&quot;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;p&gt;&quot;</span><span class="p">)</span>
+	<span class="n">clean_print</span><span class="p">(</span><span class="s2">&quot;pyRdfa cannot process this URI: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/p&gt;&quot;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;p&gt;&quot;</span><span class="p">)</span>
+		<span class="n">clean_print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/p&gt;&quot;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/body&gt;&quot;</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/html&gt;&quot;</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="brett_test"><a class="viewcode-back" href="../../init.html#rdfa_md.__init__.brett_test">[docs]</a><span class="k">def</span> <span class="nf">brett_test</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Testing, when running on W3C, the safety of the URL.</span>
+<span class="sd">	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.</span>
+
+<span class="sd">	*Note that this runs only on the W3C site (using a local Library)*</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="kn">from</span> <span class="nn">checkremote</span> <span class="kn">import</span> <span class="n">check_url_safety</span><span class="p">,</span> <span class="n">UnsupportedResourceError</span>
+	<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+		<span class="kn">from</span> <span class="nn">urllib.error</span> <span class="kn">import</span> <span class="n">HTTPError</span><span class="p">,</span> <span class="n">URLError</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="kn">from</span> <span class="nn">urllib2</span> <span class="kn">import</span> <span class="n">HTTPError</span><span class="p">,</span> <span class="n">URLError</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">check_url_safety</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+		<span class="c1"># If we got here, there have been no issues; Brett&#39;s script simply raises exceptions</span>
+		<span class="k">return</span> <span class="bp">True</span>
+	<span class="k">except</span> <span class="n">HTTPError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="n">err_message</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="s1">&#39;HTTP Error with the error code: </span><span class="si">%s</span><span class="s1"> and the error message: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">reason</span><span class="p">))</span>
+	<span class="k">except</span> <span class="n">URLError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="n">err_message</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="s1">&#39;URL Error with the error message: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="o">.</span><span class="n">reason</span><span class="p">)</span>
+	<span class="k">except</span> <span class="n">UnsupportedResourceError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="n">msg</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">err_message</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="s1">&#39;Unsupported Resource Error with the error message &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="n">args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+		<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">args</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+		<span class="n">err_message</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="s1">&#39;Exception raised: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+
+	<span class="c1"># If we got here one of the exceptions were handled, ie, the result of the check</span>
+	<span class="c1"># is False...</span>
+	<span class="k">return</span> <span class="bp">False</span></div>
+</pre></div>
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        <a class="uplink" href="../../index.html">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
+      Last updated on 25 Jan, 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. Microdata extraction &mdash; RDFa and Microdata Services—Documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="RDFa and Microdata Services—Documentation" href="index.html" />
+    <link rel="next" title="3. RDFa extraction and validation" href="rdfa.html" />
+    <link rel="prev" title="1. Top level error methods" href="init.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>RDFa and Microdata Services—Documentation</span></a></h1>
+        <h2 class="heading"><span>2. Microdata extraction</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="init.html">1. Top level error methods</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="rdfa.html">3. RDFa extraction and validation</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="module-rdfa_md.mdata">
+<span id="microdata-extraction"></span><h1>2. Microdata extraction<a class="headerlink" href="#module-rdfa_md.mdata" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>Module to handle RDFa</dt>
+<dd><ul class="first last simple">
+<li>extract RDF from an input content by parsing it for RDFa</li>
+<li>validate RDFa data as extracted from an input content</li>
+</ul>
+</dd>
+</dl>
+<p>Validation means to extract the RDFa content, using the same parser, and examining the (possible) error
+(RDF) triples that the parser generates. If any, those are displayed in a readable HTML content.</p>
+<dl class="docutils">
+<dt>Dependencies within the module:</dt>
+<dd><ul class="first last simple">
+<li>utils.py</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="rdfa_md.mdata.extract_microdata">
+<code class="descclassname">rdfa_md.mdata.</code><code class="descname">extract_microdata</code><span class="sig-paren">(</span><em>uri</em>, <em>form</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rdfa_md/mdata.html#extract_microdata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rdfa_md.mdata.extract_microdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>The standard processing of a Microdata uri options in a form; used as an entry point from a CGI call.</p>
+<p>&#64;param uri: URI to access. Note that the C{text:} and C{uploaded:} fake URI values are treated separately; the former is for textual intput (in which case a StringIO is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.</p>
+<p>&#64;param form: extra call options (from the CGI call) to set up the local options
+&#64;type form: cgi FieldStorage instance</p>
+<p>&#64;return: serialized graph
+&#64;rtype: string</p>
+</dd></dl>
+
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="init.html">1. Top level error methods</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="rdfa.html">3. RDFa extraction and validation</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
+      Last updated on 25 Jan, 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
