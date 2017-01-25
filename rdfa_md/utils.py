@@ -92,13 +92,13 @@ class FormValues(object):
 			return (StringIO(self.form.getfirst("text")), "")
 			base	= ""
 		else :
-			return (uri,uri)
+			return (uri, uri)
 
 
 #########################################################################################
 #  Helper functions to handle exceptions
 #########################################################################################
-def handle_general_exception(uri, title, form_values, graph_choice = "", extracts = True) :
+def handle_general_exception(uri, title, form_values, graph_choice = "", extracts = True, rdfa = True) :
 	"""
 	As its name suggests, handle a general exception by returning the right HTTP response in HTML
 	"""
@@ -129,9 +129,10 @@ def handle_general_exception(uri, title, form_values, graph_choice = "", extract
 	if form_values.host_language :
 		retval +="<dt>Media Type:</dt><dd>%s</dd>\n" % form_values.media_type
 	if extracts:
-		retval += "<dt>Requested graphs:</dt><dd>%s</dd>\n" % (graph_choice if graph_choice is not None else "default")
+		if rdfa:
+			retval += "<dt>Requested graphs:</dt><dd>%s</dd>\n" % (graph_choice if graph_choice is not None else "default")			
+			retval += "<dt>Space preserve:</dt><dd>%s</dd>\n" % form_values.space_preserve
 		retval += "<dt>Output serialization format:</dt><dd>%s</dd>\n" % form_values.output_format
-		retval += "<dt>Space preserve:</dt><dd>%s</dd>\n" % form_values.space_preserve
 	retval += "</dl>\n"
 	retval += "</body>\n"
 	retval += "</html>\n"

@@ -17,12 +17,13 @@ else :
 	from StringIO import StringIO
 	from urllib2 import HTTPError
 
-from .rdfa import extract_rdf, validate_rdfa
+from .rdfa  import extract_rdf, validate_rdfa
+from .mdata import extract_microdata
 import traceback, cgi
 
 
 #########################################################################################
-#  Helper functions to pre-process and check the incoming form data
+#  Helper functions to pre-process and check the incoming form data; used by the CGI scripts
 #########################################################################################
 def err_message(uri, msg) :
 	"""Return an error message in HTTP/HTML and exit the script. This is called on the topmost
@@ -78,46 +79,3 @@ def brett_test(uri) :
 	# If we got here one of the exceptions were handled, ie, the result of the check
 	# is False...
 	return False
-
-
-#########################################################################################
-#  Helper functions to handle exceptions
-#########################################################################################
-def handle_general_exception(uri, title, form_values, graph_choice = "", extracts = True) :
-	"""
-	As its name suggests, handle a general exception by returning the right HTTP response in HTML
-	"""
-	# This branch should occur only if an exception is really raised, ie, if it is not turned
-	# into a graph value.
-	retval =  'Status: 400 Invalid Input\n'
-	retval += 'Content-type: text/html; charset=utf-8\n'
-	retval += 'Status: %s\n' % 400
-	retval += '\n'
-	retval += "<html>\n"
-	retval += "<head>\n"
-	retval += "<title>%s</title>\n" % title
-	retval += "</head><body>\n"
-	retval += "<h1>%s</h1>\n" % title
-	retval += "<pre>\n"
-	strio  = StringIO()
-	traceback.print_exc(file=strio)
-	retval += strio.getvalue()
-	retval +="</pre>\n"
-	retval +="<h1>Distiller request details</h1>\n"
-	retval +="<dl>\n"
-	if uri == "text:" and "text" in form_values.form and form_values.form["text"].value != None and len(form_values.form["text"].value.strip()) != 0 :
-		retval +="<dt>Text input:</dt><dd>%s</dd>\n" % cgi.escape(form_values.form["text"].value).replace('\n','<br/>')
-	elif uri == "uploaded:" :
-		retval +="<dt>Uploaded file</dt>\n"
-	else :
-		retval +="<dt>URI received:</dt><dd><code>'%s'</code></dd>\n" % cgi.escape(uri)
-	if form_values.host_language :
-		retval +="<dt>Media Type:</dt><dd>%s</dd>\n" % form_values.media_type
-	if extracts:
-		retval += "<dt>Requested graphs:</dt><dd>%s</dd>\n" % (graph_choice if graph_choice is not None else "default")
-		retval += "<dt>Output serialization format:</dt><dd>%s</dd>\n" % form_values.output_format
-		retval += "<dt>Space preserve:</dt><dd>%s</dd>\n" % form_values.space_preserve
-	retval += "</dl>\n"
-	retval += "</body>\n"
-	retval += "</html>\n"
-	return retval

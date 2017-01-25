@@ -20,7 +20,6 @@ from __future__ import print_function
 import sys
 PY3 = (sys.version_info[0] >= 3)
 
-import traceback, cgi
 if PY3 :
 	from urllib.error import HTTPError
 else :
@@ -171,4 +170,4 @@ def validate_rdfa(uri, form={}) :
 		return handle_http_exception(uri, "HTTP Error in RDFa validation processing")
 	except :
 		return handle_general_exception(uri, "Error in RDFa validation processing", form_values,
-		                                graph_choice = "", extracts = False )
+		                                graph_choice = None, extracts = False )
