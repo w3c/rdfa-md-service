@@ -8,6 +8,12 @@ All three services are based on the newest releases of [RDFLib](https://github.c
 * check the error handling for each of these services
 * collect the form data coming from the HTML pages, call out to the RDF parsing and return the serialized graph or (in the case of the RDFa Validator) generate a proper HTML response.
 
+## Repo content:
+
+- `rdfa_md`: The relevant Python package covering both the RDFa and the Microdata branches. Put this module somewhere in $PYTHONPATH.
+- `CGI-scripts`: Python scripts that can be used as CGI entry points on a web site. These scripts are minimal; after a rudimentary checking on the incoming URI-s they dive into the functionalities in `rdf_md`.
+
+
 ## External dependencies
 
 The module has the following dependencies (beyond the standard Python modules)
@@ -18,7 +24,7 @@ The module has the following dependencies (beyond the standard Python modules)
 
 ### Python3
 
-The package has not yet been tested for Python3; the real issue is whether the dependencies are Python3 ready or not. (Current situation: unknown for rdflib-jsonld, should be o.k. for html5lib, and rdflib must be installed separately for Python3. The rdflib issue should be solved, ie, the same code should run on both Python2 and Python3 starting with version 5.)
+The package has not yet been tested for Python3 although, manually, the code has been written in a Python3 way; the real issue is whether the dependencies are Python3 ready or not. (Current situation: unknown for rdflib-jsonld, should be o.k. for html5lib, and rdflib must be installed separately for Python3. The rdflib issue should be solved, ie, the same code should run on both Python2 and Python3 starting with version 5.)
 
 
 

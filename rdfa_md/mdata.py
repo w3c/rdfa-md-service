@@ -10,19 +10,16 @@ Validation means to extract the RDFa content, using the same parser, and examini
 (RDF) triples that the parser generates. If any, those are displayed in a readable HTML content.
 
 Dependencies within the module:
-	- RDF Extraction: None
-	- RDFa Validation:
-		- validator_errors.py: working through the error triples to produce proper output
-		- validator_html.py: a single HTML template to be used for the generated output
+	- utils.py
 
 """
 from __future__ import print_function
 import sys
 PY3 = (sys.version_info[0] >= 3)
 
-if PY3 :
+if PY3:
 	from urllib.error import HTTPError
-else :
+else:
 	from urllib2 import HTTPError
 
 from rdflib import Graph
@@ -66,13 +63,13 @@ def extract_microdata(uri, form) :
 
 		# "header" collects the HTTP response; first the header with the content type,
 		# then the real data
-		if form_values.output_format == "nt" :
+		if form_values.output_format == "nt":
 			header = 'Content-Type: application/n-triples; charset=utf-8\n'
 			format = "nt"
-		elif form_values.output_format == "turtle" :
+		elif form_values.output_format == "turtle":
 			header = 'Content-Type: text/turtle; charset=utf-8\n'
 			format = "turtle"
-		elif form_values.output_format == "json-ld" or form_values.output_format == "json" :
+		elif form_values.output_format == "json-ld" or form_values.output_format == "json":
 			# This requires extra care, because the JSON-LD serializer is a separate
 			# plugin for RDFLib (alas...)
 			# If this is not successful, we are falling back on turtle
@@ -81,14 +78,14 @@ def extract_microdata(uri, form) :
 				from rdflib.plugin import register
 				from rdflib.serializer import Serializer
 				from rdflib_jsonld.serializer import JsonLDSerializer
-				register("json-ld", Serializer,"rdflib_jsonld.serializer", "JsonLDSerializer")
+				register("json-ld", Serializer, "rdflib_jsonld.serializer", "JsonLDSerializer")
 				header = 'Content-Type: application/ld+json; charset=utf-8\n'
 				format = "json-ld"
 			except:
 				# There is no JSON-LD serializer, falling back on turtle
 				header = 'Content-Type: text/turtle; charset=utf-8\n'
 				format = "turtle"
-		else :
+		else:
 			header = 'Content-Type: application/rdf+xml; charset=utf-8\n'
 			format = "pretty-xml"
 		# Extra empty line to end the HTTP response header

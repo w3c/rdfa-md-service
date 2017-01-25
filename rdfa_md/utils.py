@@ -5,9 +5,9 @@ from __future__ import print_function
 import sys
 PY3 = (sys.version_info[0] >= 3)
 
-if PY3 :
+if PY3:
 	from io import StringIO
-else :
+else:
 	from StringIO import StringIO
 
 from rdflib.plugins.parsers.pyRdfa.host import MediaTypes
@@ -37,9 +37,9 @@ class FormValues(object):
 	def __init__(self, form):
 		self.form = form
 		self.keys = list(form.keys())
-		self.host_language		 = self.get_value("host_language")
+		self.host_language       = self.get_value("host_language")
 		self.media_type          = self._get_media_type()
-		self.rdfa_version		 = self.get_value("rdfa_version", "1.1")
+		self.rdfa_version        = self.get_value("rdfa_version", "1.1")
 		self.check_lite          = (self.get_value("rdfa_lite") == "true")
 		self.embedded_rdf        = self.check_option("embedded_rdf", "true", False)
 		self.space_preserve      = self.check_option("space_preserve", "true", True)
@@ -52,15 +52,15 @@ class FormValues(object):
 	def _get_media_type(self):
 		if self.host_language is None:
 			media_type = ""
-		elif self.host_language == "xhtml" :
+		elif self.host_language == "xhtml":
 			media_type = MediaTypes.xhtml
-		elif self.host_language == "html" :
+		elif self.host_language == "html":
 			media_type = MediaTypes.html
-		elif self.host_language == "svg" :
+		elif self.host_language == "svg":
 			media_type = MediaTypes.svg
-		elif self.host_language == "atom" :
+		elif self.host_language == "atom":
 			media_type = MediaTypes.atom
-		else :
+		else:
 			media_type = MediaTypes.xml
 		return media_type
 
@@ -79,19 +79,18 @@ class FormValues(object):
 		# The second alternative is to ensure that the old style
 		# parameters are still valid.
 		# in the old days I used '-' in the parameters, the standard favours '_'
-		val = self.get_value2(key, key.replace('_','-'))
+		val = self.get_value2(key, key.replace('_', '-'))
 		return default if val is None else val == compare_value
 
 	def get_source_and_base(self, uri):
 		""" Return the location of the source data; usually it is a URI but,
 		in some cases, it may return to the embedded data in the form"""
 		# Collect the data, depending on what mechanism is used in the form
-		if uri == "uploaded:" :
+		if uri == "uploaded:":
 			return (self.form["uploaded"].file, "")
-		elif uri == "text:" :
+		elif uri == "text:":
 			return (StringIO(self.form.getfirst("text")), "")
-			base	= ""
-		else :
+		else:
 			return (uri, uri)
 
 
@@ -117,20 +116,20 @@ def handle_general_exception(uri, title, form_values, graph_choice = "", extract
 	strio  = StringIO()
 	traceback.print_exc(file=strio)
 	retval += strio.getvalue()
-	retval +="</pre>\n"
-	retval +="<h1>Distiller request details</h1>\n"
-	retval +="<dl>\n"
-	if uri == "text:" and "text" in form_values.form and form_values.form["text"].value != None and len(form_values.form["text"].value.strip()) != 0 :
-		retval +="<dt>Text input:</dt><dd>%s</dd>\n" % cgi.escape(form_values.form["text"].value).replace('\n','<br/>')
-	elif uri == "uploaded:" :
-		retval +="<dt>Uploaded file</dt>\n"
+	retval += "</pre>\n"
+	retval += "<h1>Distiller request details</h1>\n"
+	retval += "<dl>\n"
+	if uri == "text:" and "text" in form_values.form and form_values.form["text"].value is not None and len(form_values.form["text"].value.strip()) != 0:
+		retval += "<dt>Text input:</dt><dd>%s</dd>\n" % cgi.escape(form_values.form["text"].value).replace('\n', '<br/>')
+	elif uri == "uploaded:":
+		retval += "<dt>Uploaded file</dt>\n"
 	else :
-		retval +="<dt>URI received:</dt><dd><code>'%s'</code></dd>\n" % cgi.escape(uri)
-	if form_values.host_language :
-		retval +="<dt>Media Type:</dt><dd>%s</dd>\n" % form_values.media_type
+		retval += "<dt>URI received:</dt><dd><code>'%s'</code></dd>\n" % cgi.escape(uri)
+	if form_values.host_language:
+		retval += "<dt>Media Type:</dt><dd>%s</dd>\n" % form_values.media_type
 	if extracts:
 		if rdfa:
-			retval += "<dt>Requested graphs:</dt><dd>%s</dd>\n" % (graph_choice if graph_choice is not None else "default")			
+			retval += "<dt>Requested graphs:</dt><dd>%s</dd>\n" % (graph_choice if graph_choice is not None else "default")
 			retval += "<dt>Space preserve:</dt><dd>%s</dd>\n" % form_values.space_preserve
 		retval += "<dt>Output serialization format:</dt><dd>%s</dd>\n" % form_values.output_format
 	retval += "</dl>\n"
@@ -152,7 +151,7 @@ def handle_http_exception(uri, title):
 	retval += "<title></title>\n" %s
 	retval += "</head><body>\n"
 	retval += "<h1>%s</h1>\n" % title
-	retval += "<p>HTTP Error: %s (%s)</p>\n" % (h.http_code,h.msg)
+	retval += "<p>HTTP Error: %s (%s)</p>\n" % (h.http_code, h.msg)
 	retval += "<p>On URI: <code>'%s'</code></p>\n" % cgi.escape(uri)
 	retval += "</body>\n"
 	retval += "</html>\n"

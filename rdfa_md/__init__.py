@@ -10,7 +10,7 @@ __license__ = 'W3C® SOFTWARE NOTICE AND LICENSE, https://www.w3.org/Consortium/
 
 import sys
 PY3 = (sys.version_info[0] >= 3)
-if PY3 :
+if PY3:
 	from io import StringIO
 	from urllib.error import HTTPError
 else :
@@ -25,7 +25,7 @@ import traceback, cgi
 #########################################################################################
 #  Helper functions to pre-process and check the incoming form data; used by the CGI scripts
 #########################################################################################
-def err_message(uri, msg) :
+def err_message(uri, msg):
 	"""Return an error message in HTTP/HTML and exit the script. This is called on the topmost
 	CGI level, not once the extraction/validation has started.
 	"""
@@ -41,7 +41,7 @@ def err_message(uri, msg) :
 	print("<p>")
 	clean_print("pyRdfa cannot process this URI: %s", uri)
 	print("</p>")
-	if len(msg) != 0 :
+	if len(msg) != 0:
 		print("<p>")
 		clean_print(msg)
 		print("</p>")
@@ -49,7 +49,7 @@ def err_message(uri, msg) :
 	print("</html>")
 
 
-def brett_test(uri) :
+def brett_test(uri):
 	"""Testing, when running on W3C, the safety of the URL.
 	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.
 
@@ -72,8 +72,8 @@ def brett_test(uri) :
 		msg = e.args[0] + ": " + e.args[1]
 		err_message(uri, 'Unsupported Resource Error with the error message "%s"' % msg)
 	except Exception as e:
-		l = len(e.args)
-		msg = "" if l == 0 else (e.args[0] if l == 1 else repr(e.args))
+		args = len(e.args)
+		msg = "" if args == 0 else (e.args[0] if args == 1 else repr(e.args))
 		err_message(uri, 'Exception raised: "%s"' % msg)
 
 	# If we got here one of the exceptions were handled, ie, the result of the check

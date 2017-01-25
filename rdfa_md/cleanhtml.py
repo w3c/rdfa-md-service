@@ -22,12 +22,12 @@
 # than Python's string interpolation.
 
 from __future__ import print_function
+from cgi import escape
+from itertools import chain
 
 __all__ = ['clean_str', 'clean_strs', 'multi_format', 'clean_format',
            'multi_print', 'clean_print']
 
-from cgi import escape
-from itertools import chain
 
 def clean_str(s):
     """Make s a string and escape all important entities."""
@@ -36,9 +36,11 @@ def clean_str(s):
     except AttributeError:  # not a string type
         return escape(str(s), quote=True)
 
+
 def clean_strs(*args):
     """Iterate over each argument run through clean_str."""
     return (clean_str(x) for x in args)
+
 
 def multi_format(s, *params):
     """Format a string with many iterators.
@@ -47,6 +49,7 @@ def multi_format(s, *params):
     will be chained together in sequence to make format arguments."""
     return s % tuple(chain(*params))
 
+
 def clean_format(s, *args):
     """Interpolate a string after passing arguments through cgi.escape.
 
@@ -54,17 +57,20 @@ def clean_format(s, *args):
     will be run through clean_strs and then used to format the string."""
     return multi_format(s, clean_strs(*args))
 
+
 def multi_print(s, *params):
     """Print a string formatted with many iterators.
 
     This is a convenience function that prints multi_format(s, *params)."""
     print(multi_format(s, *params))
 
+
 def clean_print(s, *args):
     """Print a string after passing arguments through cgi.escape.
 
     This is a convenience function that prints clean_format(s, *args)."""
     print(clean_format(s, *args))
+
 
 if __name__ == '__main__':
     test_input = [42, '<foo>', '<a b="c&d">']

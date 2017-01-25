@@ -8,10 +8,10 @@ from __future__ import print_function
 import sys
 PY3 = (sys.version_info[0] >= 3)
 
-if PY3 :
+if PY3:
 	from io import StringIO
 	from urllib.error import HTTPError
-else :
+else:
 	from StringIO import StringIO
 	from urllib2 import HTTPError
 import xml.dom.minidom
@@ -25,7 +25,7 @@ from rdflib.plugins.parsers.pyRdfa.options import Options
 from .validator_html	import html_page
 from .validator_errors  import Errors
 
-class Validator :
+class Validator:
 	"""
 	Shell around the distiller and the error message management.
 	@ivar default_graph: default graph for the results
@@ -42,7 +42,7 @@ class Validator :
 	@ivar errors: separate class instance to generate the error code
 	@type errors: L{Errors}
 	"""
-	def __init__(self, uri, base, media_type = "", vocab_expansion = False, check_lite = False, embedded_rdf = False) :
+	def __init__(self, uri, base, media_type = "", vocab_expansion = False, check_lite = False, embedded_rdf = False):
 		"""
 		@param uri: the URI for the content to be analyzed
 		@type uri: file-like object (e.g., when content goes through an HTTP Post) or a string
@@ -66,21 +66,21 @@ class Validator :
 		self.domtree = xml.dom.minidom.parse(StringIO(html_page % date.today().isoformat()))
 
 		# find the warning/error content
-		for div in self.domtree.getElementsByTagName("div") :
-			if div.hasAttribute("id") and div.getAttribute("id") == "Message" :
+		for div in self.domtree.getElementsByTagName("div"):
+			if div.hasAttribute("id") and div.getAttribute("id") == "Message":
 				self.message = div
 				break
 
 		# find the turtle output content
-		for pre in self.domtree.getElementsByTagName("pre") :
-			if pre.hasAttribute("id") and pre.getAttribute("id") == "output" :
+		for pre in self.domtree.getElementsByTagName("pre"):
+			if pre.hasAttribute("id") and pre.getAttribute("id") == "output":
 				self.code = pre
 				break
 
 		self.errors = Errors(self)
 	# end __init__
 
-	def parse(self) :
+	def parse(self):
 		"""
 		Parse the RDFa input and store the processor and default graphs. The final media type is also updated.
 		"""
@@ -93,7 +93,7 @@ class Validator :
 		# Oh well...
 		#
 		transformers = []
-		if self.check_lite :
+		if self.check_lite:
 			from rdflib.plugins.parsers.pyRdfa.transform.lite import lite_prune
 			transformers.append(lite_prune)
 
@@ -107,7 +107,7 @@ class Validator :
 		# Extracting some parameters for the error messages
 		self.processor 	= processor
 
-	def complete_DOM(self) :
+	def complete_DOM(self):
 		"""
 		Add the generated graph, in turtle encoding, as well as the error messages, to the final DOM tree
 		"""
@@ -119,17 +119,10 @@ class Validator :
 		# Settle the error message
 		self.errors.interpret()
 
-	def run(self) :
+	def run(self):
 		"""
 		Run the two steps of validation, and return the serialized version of the DOM Tree, ready to be displayed
 		"""
 		self.parse()
 		self.complete_DOM()
 		return self.domtree.toxml(encoding="utf-8")
-
-if __name__ == '__main__':
-	sys.path.insert(0,"/Users/ivan/Library/Python")
-
-	validator = Validator("https://www.ivan-herman.net/AboutMe.html", base = "")
-	r = validator.run()
-	print(r)
