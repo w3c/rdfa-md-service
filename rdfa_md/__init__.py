@@ -121,23 +121,3 @@ def handle_general_exception(uri, title, form_values, graph_choice = "", extract
 	retval += "</body>\n"
 	retval += "</html>\n"
 	return retval
-
-
-def handle_http_exception(uri, title):
-	"""Handle an HTTPError exception, by pulling together the HTTP response.
-	This must be invoked from an except clause for an HTTPError
-	"""
-	(e_type, h, e_traceback) = sys.exc_info()
-	retval =  'Status: 400 Invalid Input\n'
-	retval += 'Content-type: text/html; charset=utf-8\n'
-	retval += 'Status: %s\n' % h.http_code
-	retval += "<html>\n"
-	retval += "<head>\n"
-	retval += "<title></title>\n" %s
-	retval += "</head><body>\n"
-	retval += "<h1>%s</h1>\n" % title
-	retval += "<p>HTTP Error: %s (%s)</p>\n" % (h.http_code,h.msg)
-	retval += "<p>On URI: <code>'%s'</code></p>\n" % cgi.escape(uri)
-	retval += "</body>\n"
-	retval += "</html>\n"
-	return retval
