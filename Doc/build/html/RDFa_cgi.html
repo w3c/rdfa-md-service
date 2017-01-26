@@ -49,7 +49,16 @@
   <div class="section" id="module-CGI_scripts.RDFa_cgi">
 <span id="rdfa-services-entry-point"></span><h1>9. RDFa services entry point<a class="headerlink" href="#module-CGI_scripts.RDFa_cgi" title="Permalink to this headline">¶</a></h1>
 <p>CGI entry point for the RDFa extraction or validation via RDFLib.</p>
-<p>This version is adapted, for Python paths, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.</p>
+<p>This is meant to be a CGI script: i.e., it auto-executes if invoked by calling <a class="reference internal" href="#CGI_scripts.RDFa_cgi.process_input" title="CGI_scripts.RDFa_cgi.process_input"><code class="xref py py-func docutils literal"><span class="pre">process_input()</span></code></a> with a <code class="docutils literal"><span class="pre">cgi.FieldStorage()</span></code> instance as an argument.</p>
+<p>This version is set up, as far as the Python paths are concerned, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.</p>
+<p><strong>Global variables:</strong></p>
+<dl class="data">
+<dt id="CGI_scripts.RDFa_cgi.running_at_w3c">
+<code class="descclassname">CGI_scripts.RDFa_cgi.</code><code class="descname">running_at_w3c</code><a class="headerlink" href="#CGI_scripts.RDFa_cgi.running_at_w3c" title="Permalink to this definition">¶</a></dt>
+<dd><p>If running at W3C, a specific, local script is also invoked via <a class="reference internal" href="#CGI_scripts.RDFa_cgi.uri_test" title="CGI_scripts.RDFa_cgi.uri_test"><code class="xref py py-func docutils literal"><span class="pre">uri_test()</span></code></a> (see <a class="reference internal" href="init.html#rdfa_md.__init__.brett_test" title="rdfa_md.__init__.brett_test"><code class="xref py py-func docutils literal"><span class="pre">brett_test()</span></code></a>)</p>
+</dd></dl>
+
+<p><strong>Global functions:</strong></p>
 <dl class="function">
 <dt id="CGI_scripts.RDFa_cgi.uri_test">
 <code class="descclassname">CGI_scripts.RDFa_cgi.</code><code class="descname">uri_test</code><span class="sig-paren">(</span><em>uri</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/CGI_scripts/RDFa_cgi.html#uri_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#CGI_scripts.RDFa_cgi.uri_test" title="Permalink to this definition">¶</a></dt>
@@ -75,11 +84,7 @@ to do the real work.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>uri</strong> &#8211; the URI for the RDFa source (if relevant, ie, if the data is not uploaded or fed in as text)</li>
-<li><strong>form</strong> &#8211; form data, as returned by Python&#8217;s FieldStorage</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>form</strong> (<em>cgi.FieldStorage</em>) &#8211; keyword arguments of the HTTP call</td>
 </tr>
 </tbody>
 </table>

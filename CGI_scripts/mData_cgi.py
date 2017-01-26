@@ -4,8 +4,18 @@
 """
 CGI entry point for the Microdata extraction via RDFLib.
 
-This version is adapted, for Python paths, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.
+This is meant to be a CGI script: i.e., it auto-executes if invoked by calling :py:func:`process_input` with a ``cgi.FieldStorage()`` instance as an argument.
 
+This version is set up, as far as the Python paths are concerned, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.
+
+**Global variables:**
+
+.. py:data:: running_at_w3c
+
+   If running at W3C, a specific, local script is also invoked via :py:func:`uri_test` (see :py:func:`~rdfa_md.__init__.brett_test`)
+
+
+**Global functions:**
 """
 from __future__ import print_function
 __version__ = "1.0"
@@ -48,7 +58,8 @@ def process_input(form):
 	"""Pre-rocess the form data. If all checking and processing is fine, call out to processURI
 	to do the real work.
 
-	:param form: form data, as returned by Python's FieldStorage
+	:param form: keyword arguments of the HTTP call
+	:type form: cgi.FieldStorage
 	"""
 
 	uri = ""

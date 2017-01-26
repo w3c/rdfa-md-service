@@ -48,8 +48,18 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">CGI entry point for the Microdata extraction via RDFLib.</span>
 
-<span class="sd">This version is adapted, for Python paths, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.</span>
+<span class="sd">This is meant to be a CGI script: i.e., it auto-executes if invoked by calling :py:func:`process_input` with a ``cgi.FieldStorage()`` instance as an argument.</span>
 
+<span class="sd">This version is set up, as far as the Python paths are concerned, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.</span>
+
+<span class="sd">**Global variables:**</span>
+
+<span class="sd">.. py:data:: running_at_w3c</span>
+
+<span class="sd">   If running at W3C, a specific, local script is also invoked via :py:func:`uri_test` (see :py:func:`~rdfa_md.__init__.brett_test`)</span>
+
+
+<span class="sd">**Global functions:**</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
@@ -92,7 +102,8 @@
 	<span class="sd">&quot;&quot;&quot;Pre-rocess the form data. If all checking and processing is fine, call out to processURI</span>
 <span class="sd">	to do the real work.</span>
 
-<span class="sd">	:param form: form data, as returned by Python&#39;s FieldStorage</span>
+<span class="sd">	:param form: keyword arguments of the HTTP call</span>
+<span class="sd">	:type form: cgi.FieldStorage</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
