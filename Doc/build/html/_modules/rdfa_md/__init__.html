@@ -45,6 +45,10 @@
 <span></span><span class="ch">#!/usr/bin/python</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># Maintainer: Ivan Herman &lt;ivan@w3.org&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">These error handling methods are not meant to be used by the rest of the package but, rather, the CGI interface doing extra checks before proceeding with the real RDF data extraction.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
@@ -70,8 +74,13 @@
 <span class="c1">#  Helper functions to pre-process and check the incoming form data; used by the CGI scripts</span>
 <span class="c1">#########################################################################################</span>
 <div class="viewcode-block" id="err_message"><a class="viewcode-back" href="../../init.html#rdfa_md.__init__.err_message">[docs]</a><span class="k">def</span> <span class="nf">err_message</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Return an error message in HTTP/HTML and exit the script. This is called on the topmost</span>
-<span class="sd">	CGI level, not once the extraction/validation has started.</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Prints an error message as an HTTP response in HTML.</span>
+<span class="sd">	</span>
+<span class="sd">	:param str uri: The URI used to start up the script</span>
+<span class="sd">	:param str msg: The extra message to be displayed</span>
+
+<span class="sd">	This function is called on the topmost CGI level, before the extraction/validation has started.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="kn">from</span> <span class="nn">.cleanhtml</span> <span class="kn">import</span> <span class="n">clean_print</span>
 	<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Content-type: text/html; charset=utf-8&#39;</span><span class="p">)</span>
@@ -94,10 +103,16 @@
 
 </div>
 <div class="viewcode-block" id="brett_test"><a class="viewcode-back" href="../../init.html#rdfa_md.__init__.brett_test">[docs]</a><span class="k">def</span> <span class="nf">brett_test</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Testing, when running on W3C, the safety of the URL.</span>
-<span class="sd">	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Test, when running on W3C, the safety of the URL.</span>
 
-<span class="sd">	*Note that this runs only on the W3C site (using a local Library)*</span>
+<span class="sd">	:param str uri: The URI used to start up the script</span>
+<span class="sd">	:return: result of the check</span>
+<span class="sd">	:rtype: Boolean</span>
+
+<span class="sd">	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller.</span>
+
+<span class="sd">	Contributed by Brett Smith, W3C, and relying on an external library (``check_url_safety``) running at the W3C. *This method runs only on the W3C site and its invocation must be preceded by an appropriate check*.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="kn">from</span> <span class="nn">checkremote</span> <span class="kn">import</span> <span class="n">check_url_safety</span><span class="p">,</span> <span class="n">UnsupportedResourceError</span>
 	<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
@@ -136,7 +151,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
-      Last updated on 25 Jan, 2017.
+      Last updated on 26 Jan, 2017.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>

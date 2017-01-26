@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Maintainer: Ivan Herman <ivan@w3.org>
+"""
+These error handling methods are not meant to be used by the rest of the package but, rather, the CGI interface doing extra checks before proceeding with the real RDF data extraction.
+
+"""
 from __future__ import print_function
 
 __version__ = "1.0"
@@ -26,8 +30,13 @@ import traceback, cgi
 #  Helper functions to pre-process and check the incoming form data; used by the CGI scripts
 #########################################################################################
 def err_message(uri, msg):
-	"""Return an error message in HTTP/HTML and exit the script. This is called on the topmost
-	CGI level, not once the extraction/validation has started.
+	"""
+	Prints an error message as an HTTP response in HTML.
+	
+	:param str uri: The URI used to start up the script
+	:param str msg: The extra message to be displayed
+
+	This function is called on the topmost CGI level, before the extraction/validation has started.
 	"""
 	from .cleanhtml import clean_print
 	print('Content-type: text/html; charset=utf-8')
@@ -50,10 +59,16 @@ def err_message(uri, msg):
 
 
 def brett_test(uri):
-	"""Testing, when running on W3C, the safety of the URL.
-	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.
+	"""
+	Test, when running on W3C, the safety of the URL.
 
-	*Note that this runs only on the W3C site (using a local Library)*
+	:param str uri: The URI used to start up the script
+	:return: result of the check
+	:rtype: Boolean
+
+	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller.
+
+	Contributed by Brett Smith, W3C, and relying on an external library (``check_url_safety``) running at the W3C. *This method runs only on the W3C site and its invocation must be preceded by an appropriate check*.
 	"""
 	from checkremote import check_url_safety, UnsupportedResourceError
 	if PY3:

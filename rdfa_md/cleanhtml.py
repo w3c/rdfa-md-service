@@ -1,25 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""cleanhtml - Wrapper functions to prevent XSS in HTML output"""
-# <http://dev.w3.org/2004/PythonLib-IH/cleanhtml.py>
-#
-# Copyright © 2013 World Wide Web Consortium, (Massachusetts Institute
-# of Technology, European Research Consortium for Informatics and
-# Mathematics, Keio University, Beihang). All Rights Reserved. This
-# work is distributed under the W3C® Software License [1] in the hope
-# that it will be useful, but WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-# PURPOSE.
-#
-# [1] http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231
-#
-# Written October 2013 by Brett Smith <brett@w3.org>
-#
-# Disclaimer:
-# These functions were designed to make them as easy as possible to use
-# with the current style of CGI scripts.  If you're writing a new CGI from
-# scratch, please consider using a more robust system for HTML output
-# than Python's string interpolation.
+"""cleanhtml - Wrapper functions to prevent XSS in HTML output.
+
+Written in October 2013 by Brett Smith <brett@w3.org>
+
+Disclaimer:
+These functions were designed to make them as easy as possible to use
+with the current style of CGI scripts.  If you're writing a new CGI from
+scratch, please consider using a more robust system for HTML output
+than Python's string interpolation.
+
+
+"""
 
 from __future__ import print_function
 from cgi import escape

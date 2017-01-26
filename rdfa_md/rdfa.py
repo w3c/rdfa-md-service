@@ -2,19 +2,9 @@
 # -*- coding: utf-8 -*-
 # Maintainer: Ivan Herman <ivan@w3.org>
 """
-Module to handle RDFa
-   - extract RDF from an input content by parsing it for RDFa
-   - validate RDFa data as extracted from an input content
-
-Validation means to extract the RDFa content, using the same parser, and examining the (possible) error
-(RDF) triples that the parser generates. If any, those are displayed in a readable HTML content.
-
-Dependencies within the module:
-	- RDF Extraction: None
-	- RDFa Validation:
-		- validator_errors.py: working through the error triples to produce proper output
-		- validator_html.py: a single HTML template to be used for the generated output
-
+Module to handle RDFa data. The module contains two different methods:
+   - Extract RDF from an input content by parsing it for RDFa (:py:func:`extract_rdf`)
+   - Validate RDFa data as extracted from an input content (:py:func:`validate_rdfa`). (This function depends on other modules in the package.)
 """
 from __future__ import print_function
 import sys
@@ -38,15 +28,17 @@ from .utils import FormValues, handle_http_exception, handle_general_exception
 # some basic information on the calling parameters.
 #########################################################################################
 def extract_rdf(uri, form):
-	"""The standard processing of an RDFa uri options in a form; used as an entry point from a CGI call.
+	"""
+	Extract RDFa data from HTML or from various XML formats (SVG, XML, Atom, etc) and returns the resulting RDF data
 
-	@param uri: URI to access. Note that the C{text:} and C{uploaded:} fake URI values are treated separately; the former is for textual intput (in which case a StringIO is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
+	:param str uri: URI for the HTML data. Note that the ``text:`` and ``uploaded`` fake URI values are treated separately; the former is for textual intput (in which case a ``StringIO`` instance is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
 
-	@param form: extra call options (from the CGI call) to set up the local options
-	@type form: cgi FieldStorage instance
+	:param cgi.FieldStorage form: the query parameters of the original request. See the description of the :py:class:`~.utils.FormValues` class for further details on the relevant form entries.
 
-	@return: serialized graph
-	@rtype: string
+	:return: HTTP response, containing the RDF data encoded in the format requested by the user (default: ``turtle``), or an error message if applicable
+	:rtype: str
+
+	The function parses the HTML/SVG/XML content using the built-in ``RDFLib`` RDFa parser, and serializes the resulting RDF data using the serializaiton format requested by the user and returns the results. Serialization relies on the built-in ``RDFLib`` serializer for ``turtle``, ``nt``, or ``RDF/XML``, and on an ``RDFLib`` extension package (``rdflib_jsonld``) for ``JSON-LD``.
 	"""
 
 	form_values = FormValues(form)
@@ -130,29 +122,26 @@ def extract_rdf(uri, form):
 		return handle_general_exception(uri, "Exception in distilling RDFa", form_values,
 		                                graph_choice = graph_choice, extracts = True)
 
-#########################################################################################
-# RDFa Validation:  use the RDFLib parser to extract the RDF graph, serialize it and
-# The rough order of working:
-# - generate the default and the processor graphs via the distiller
-# - take the HTML code template in L{html_page}
-# - expand the DOM tree of that template by (a) generate a list of errors and warnings in HTML and (b) add the generated code
-# - serialize the HTML page as an output to the CGI call
-#########################################################################################
+
 
 def validate_rdfa(uri, form={}):
-	"""The standard processing of an RDFa uri options in a form, ie, as an entry point from a CGI call. For compatibility
-	reasons with the RDFa 1.1 distiller (the same CGI entry point is used for both) the form's content may include a number
-	of entries that this function ignores.
+	"""
+	Validate the RDFa data from HTML or from various XML formats (SVG, XML, Atom, etc).
 
-	The call accepts the following extra form option (eg, HTTP GET options):
+	:param str uri: URI for the HTML data. Note that the ``text:`` and ``uploaded`` fake URI values are treated separately; the former is for textual intput (in which case a ``StringIO`` instance is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
 
-	 - C{host_language=[xhtml,html,xml]} : the host language. Used when files are uploaded or text is added verbatim, otherwise the HTTP return header shoudl be used
+	:param cgi.FieldStorage form: the query parameters of the original request. See the description of the :py:class:`~.utils.FormValues` class for further details on the relevant form entries.
+	
+	:return: HTTP response, containing the RDF data encoded in the format requested by the user (default: ``turtle``), or an error message if applicable
+	:rtype: str
 
-	@param uri: URI to access. Note that the "text:" and "uploaded:" values are treated separately; the former is for textual intput (in which case a StringIO is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
-	@param form: extra call options (from the CGI call) to set up the local options
-	@type form: cgi FieldStorage instance
-	@return: serialized HTML content
-	@rtype: string
+	On high level, the method:
+	  - Extracts the RDFa data using the standard ``RDFLib`` RDFa parser in such a way that the "processor graph" (containing the warning and error triples detected by the parser) is also generated
+	  - Interprets the processor graph triples by generating a human readable message in HTML
+	  - Adds the extracted RDF graph to the output, serialized in turtle
+	  - Returns the HTML content in the HTTP response.
+
+	The real work is done in the separate :py:class:`.validator.Validator` class, this method is only a shell around that.
 	"""
 	form_values = FormValues(form)
 	# Collect the data, depending on what mechanism is used in the form

@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-RDFa 1.1 validator. HTML source template for the output
+HTML source template for the output.
 
-@summary: RDFa validator, html template
-@organization: U{World Wide Web Consortium<http://www.w3.org>}
-@author: U{Ivan Herman<a href="http://www.w3.org/People/Ivan/">}
-@license: This software is available for use under the
-U{W3C® SOFTWARE NOTICE AND LICENSE<href="http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231">}
-@var html_page: the XHTML code as a template for the output
+.. py:data:: html_page
+
+   One large string with an HTML page that must be completed by the relevant extra data.
 """
 
-html_page = """<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01+RDFa 1.1//EN" "http://www.w3.org/MarkUp/DTD/html401-rdfa11-1.dtd">
+html_page = """<!DOCTYPE html>
 <html>
   <head>
 	<title>RDFa 1.1 Validator (Test Version for pyRdfa 3.X)</title>

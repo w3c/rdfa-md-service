@@ -27,30 +27,54 @@ from .validator_errors  import Errors
 
 class Validator:
 	"""
-	Shell around the distiller and the error message management.
-	@ivar default_graph: default graph for the results
-	@ivar processor_graph: processor graph (ie, errors and warnings)
-	@ivar uri: file like object or URI of the source
-	@ivar base: base value for the generated RDF output
-	@ivar media_type: media type of the source
-	@ivar vocab_expansion: whether vocabulary expansion should occur or not
-	@ivar check_lite: whether RDFa 1.1 Lite should be checked
-	@ivar hturtle: whether the embedded turtle should be included in the output
-	@ivar domtree: the Document Node of the final domtree where the final HTML code should be added
-	@ivar message: the Element Node in the final DOM Tree where the error/warning messages should be added
-	@ivar code: the Element Node in the final DOM Tree where the generated code should be added
-	@ivar errors: separate class instance to generate the error code
-	@type errors: L{Errors}
+	Shell to handle the validation process
+
+	:param uri: the URI for the content to be analyzed. Also stored as a class attribute.
+	:type uri: a file-like object  (e.g, when the content is uploaded by the user) or a string.
+	:param str base: the base URI for the generated RDF. Also stored as a class attribute.
+
+	:param media_type: media type, when provided by the user. If "" or `None`, the distiller will try to find the media type itself.
+	:type media_type: enumeration type class in :py:Class:`rdflib.plugins.parsers.pyRdfa.host.MediaType`
+
+	:param bool vocab_expansion: whether the vocabulary `expansion feature of RDFa
+	 <https://www.w3.org/TR/rdfa-core/#s_vocab_expansion>`_ should also be executed. Also stored as a class attribute.
+
+	:param bool check_lite: whether extra checks on the source being valid RDFa 1.1 Lite should be executed. Also stored as a class attribute.
+
+	:param embedded_rdf: whether extra RDF data, embedded via a ``<script>`` element and encoded in Turtle, should be added to the final results. Also stored as a class attribute.
+
+	When initialized, a domtree is created (by the standard Python `minidom` package), using the HTML template pattern in :py:obj:`~.validator_html.html_page`. This DOM tree is completed, after parsing, with the interpretation of the error/warning triples and the encoded RDFa graph.
+
+	**Additional class variables:**
+
+	.. py:attribute:: default_graph
+
+	   an ``RDFLib`` graph, holding the generated RDF data
+
+	.. py:attribute:: processor_graph
+
+	   an ``RDFLib`` graph, holding the error/warning/information triples
+
+	.. py:attribute:: domtree
+
+	   the DOM tree to hold the final message to the caller
+
+	.. py:attribute:: message
+
+	   element in the DOM tree where the final messages must be stored (a ``<div>`` element)
+
+	.. py:attribute:: code
+
+	   element in the DOM tree where the serialized output graph should be stored (a ``<code>`` element)
+
+	.. py:attribute:: Errors
+
+	   an instance of a :py:class:`~.validator_errors.Errors` class, initialized by this class instance
+
+	**Class methods:**
+
 	"""
 	def __init__(self, uri, base, media_type = "", vocab_expansion = False, check_lite = False, embedded_rdf = False):
-		"""
-		@param uri: the URI for the content to be analyzed
-		@type uri: file-like object (e.g., when content goes through an HTTP Post) or a string
-		@param base: the base URI for the generated RDF
-		@type base: string
-		@param media_type: Media Type, see the media type management of pyRdfa. If "", the distiller will try to find the media type out.
-		@type media_type: pyRdfa.host.MediaTypes value
-		"""
 		# Create the graphs into which the content is put
 		self.default_graph   = Graph()
 		self.processor_graph = Graph()
@@ -60,7 +84,6 @@ class Validator:
 		self.embedded_rdf	 = embedded_rdf
 		self.check_lite		 = check_lite
 		self.vocab_expansion = vocab_expansion
-
 
 		# Get the DOM tree that will be the scaffold for the output
 		self.domtree = xml.dom.minidom.parse(StringIO(html_page % date.today().isoformat()))
@@ -82,16 +105,10 @@ class Validator:
 
 	def parse(self):
 		"""
-		Parse the RDFa input and store the processor and default graphs. The final media type is also updated.
+		Parse the RDFa input and store the processor and default graphs. The final media type in the class instance also updated.
+
+		*Implementation note:* this method goes down into the "guts" of the RDFa parser plugin of `RDFLib`, instead of simply executing a simple parsing. The reason is that the parser does not "expose", on the top level, an extra "transformer" function that checks the RDFa 1.1 Lite features (and adds warning triples to the processor graph), and this can only be added to the parser using one step deeper into the plugin code. (See the :py:func:`rdflib.plugins.parsers.pyRdfa.transform.lite.lite_prune` function).
 		"""
-		#
-		# The reason why we have to go down the 'guts' of the RDFa parser plugin is in the
-		# RDFa lite checking below. What that extra 'transformer' does in the parser is to
-		# add RDFa Lite specific triples into the processor graph which is used to generate
-		# the relevant warning. If that step was not used or necessary, we could remain on the
-		# "user" level and simply use the 'official' parsing of the incoming data.
-		# Oh well...
-		#
 		transformers = []
 		if self.check_lite:
 			from rdflib.plugins.parsers.pyRdfa.transform.lite import lite_prune
@@ -109,7 +126,7 @@ class Validator:
 
 	def complete_DOM(self):
 		"""
-		Add the generated graph, in turtle encoding, as well as the error messages, to the final DOM tree
+		Add the generated graph, in turtle encoding, as well as the error messages, to the final DOM tree. Interpreting the the error messages is done by the separate :py:class:`.validator_errors.Errors` class instance (whose instance is initialized when this class is created).
 		"""
 		# Add the RDF code in the DOM tree
 		outp = self.default_graph.serialize(format="turtle")
@@ -121,7 +138,7 @@ class Validator:
 
 	def run(self):
 		"""
-		Run the two steps of validation, and return the serialized version of the DOM Tree, ready to be displayed
+		Run the two steps of validation (parsing and completing the DOM), and return the serialized version of the DOM, ready to be displayed
 		"""
 		self.parse()
 		self.complete_DOM()

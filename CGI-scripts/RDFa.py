@@ -46,7 +46,7 @@ def uri_test(uri) :
 
 	If this test reveals any problem, the script exits!!!
 
-	@param uri: the URI to be checked.
+	:param uri: the URI to be checked.
 	"""
 	if running_at_w3c and not brett_test(uri): sys.exit(1)
 
@@ -54,8 +54,8 @@ def process_input(form):
 	"""Pre-rocess the form data. If all checking and processing is fine, call out to processURI
 	to do the real work.
 
-	@param uri: the URI for the RDFa source (if relevant, ie, if the data is not uploaded or fed in as text)
-	@param form: form data, as returned by Python's FieldStorage
+	:param uri: the URI for the RDFa source (if relevant, ie, if the data is not uploaded or fed in as text)
+	:param form: form data, as returned by Python's FieldStorage
 	"""
 
 	uri = ""

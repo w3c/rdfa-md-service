@@ -45,7 +45,13 @@
         
   <div class="section" id="module-rdfa_md.cleanhtml">
 <span id="clean-generated-html"></span><h1>8. Clean generated HTML<a class="headerlink" href="#module-rdfa_md.cleanhtml" title="Permalink to this headline">¶</a></h1>
-<p>cleanhtml - Wrapper functions to prevent XSS in HTML output</p>
+<p>cleanhtml - Wrapper functions to prevent XSS in HTML output.</p>
+<p>Written in October 2013 by Brett Smith &lt;<a class="reference external" href="mailto:brett&#37;&#52;&#48;w3&#46;org">brett<span>&#64;</span>w3<span>&#46;</span>org</a>&gt;</p>
+<p>Disclaimer:
+These functions were designed to make them as easy as possible to use
+with the current style of CGI scripts.  If you&#8217;re writing a new CGI from
+scratch, please consider using a more robust system for HTML output
+than Python&#8217;s string interpolation.</p>
 <dl class="function">
 <dt id="rdfa_md.cleanhtml.clean_str">
 <code class="descclassname">rdfa_md.cleanhtml.</code><code class="descname">clean_str</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rdfa_md/cleanhtml.html#clean_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rdfa_md.cleanhtml.clean_str" title="Permalink to this definition">¶</a></dt>
@@ -104,7 +110,7 @@ will be run through clean_strs and then used to format the string.</p>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
-      Last updated on 25 Jan, 2017.
+      Last updated on 26 Jan, 2017.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>

@@ -2,15 +2,7 @@
 # -*- coding: utf-8 -*-
 # Maintainer: Ivan Herman <ivan@w3.org>
 """
-Module to handle RDFa
-   - extract RDF from an input content by parsing it for RDFa
-   - validate RDFa data as extracted from an input content
-
-Validation means to extract the RDFa content, using the same parser, and examining the (possible) error
-(RDF) triples that the parser generates. If any, those are displayed in a readable HTML content.
-
-Dependencies within the module:
-	- utils.py
+The only function in this module (:py:func:`extract_microdata`) is used to extract RDF data, encoded in microdata, from an HTML source.
 
 """
 from __future__ import print_function
@@ -22,6 +14,8 @@ if PY3:
 else:
 	from urllib2 import HTTPError
 
+# The import to cgi is necessary for the proper documentation!
+import cgi
 from rdflib import Graph
 from rdflib.plugins.parsers.pyRdfa.host import MediaTypes
 from .utils import FormValues, handle_http_exception, handle_general_exception
@@ -33,15 +27,17 @@ from .utils import FormValues, handle_http_exception, handle_general_exception
 # some basic information on the calling parameters.
 #########################################################################################
 def extract_microdata(uri, form) :
-	"""The standard processing of a Microdata uri options in a form; used as an entry point from a CGI call.
+	"""
+	Extract microdata data from HTML and returns the resulting RDF data.
 
-	@param uri: URI to access. Note that the C{text:} and C{uploaded:} fake URI values are treated separately; the former is for textual intput (in which case a StringIO is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
+	:param str uri: URI for the HTML data. Note that the ``text:`` and ``uploaded`` fake URI values are treated separately; the former is for textual intput (in which case a ``StringIO`` instance is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.
 
-	@param form: extra call options (from the CGI call) to set up the local options
-	@type form: cgi FieldStorage instance
+	:param cgi.FieldStorage form: the query parameters of the original request
+	
+	:return: HTTP response, containing the RDF data encoded in the format requested by the user (default: ``turtle``), or an error message if applicable
+	:rtype: str
 
-	@return: serialized graph
-	@rtype: string
+	The function parses the HTML content using the built-in ``RDFLib`` microdata parser, and serializes the resulting RDF data using the serializaiton format requested by the user and returns the results. Serialization relies on the built-in ``RDFLib`` serializer for ``turtle``, ``nt``, or ``RDF/XML``, and on an ``RDFLib`` extension package (``rdflib_jsonld``) for ``JSON-LD``.
 	"""
 
 	form_values = FormValues(form)

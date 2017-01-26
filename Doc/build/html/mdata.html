@@ -48,32 +48,30 @@
         
   <div class="section" id="module-rdfa_md.mdata">
 <span id="microdata-extraction"></span><h1>2. Microdata extraction<a class="headerlink" href="#module-rdfa_md.mdata" title="Permalink to this headline">¶</a></h1>
-<dl class="docutils">
-<dt>Module to handle RDFa</dt>
-<dd><ul class="first last simple">
-<li>extract RDF from an input content by parsing it for RDFa</li>
-<li>validate RDFa data as extracted from an input content</li>
-</ul>
-</dd>
-</dl>
-<p>Validation means to extract the RDFa content, using the same parser, and examining the (possible) error
-(RDF) triples that the parser generates. If any, those are displayed in a readable HTML content.</p>
-<dl class="docutils">
-<dt>Dependencies within the module:</dt>
-<dd><ul class="first last simple">
-<li>utils.py</li>
-</ul>
-</dd>
-</dl>
+<p>The only function in this module (<a class="reference internal" href="#rdfa_md.mdata.extract_microdata" title="rdfa_md.mdata.extract_microdata"><code class="xref py py-func docutils literal"><span class="pre">extract_microdata()</span></code></a>) is used to extract RDF data, encoded in microdata, from an HTML source.</p>
 <dl class="function">
 <dt id="rdfa_md.mdata.extract_microdata">
 <code class="descclassname">rdfa_md.mdata.</code><code class="descname">extract_microdata</code><span class="sig-paren">(</span><em>uri</em>, <em>form</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rdfa_md/mdata.html#extract_microdata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rdfa_md.mdata.extract_microdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>The standard processing of a Microdata uri options in a form; used as an entry point from a CGI call.</p>
-<p>&#64;param uri: URI to access. Note that the C{text:} and C{uploaded:} fake URI values are treated separately; the former is for textual intput (in which case a StringIO is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.</p>
-<p>&#64;param form: extra call options (from the CGI call) to set up the local options
-&#64;type form: cgi FieldStorage instance</p>
-<p>&#64;return: serialized graph
-&#64;rtype: string</p>
+<dd><p>Extract microdata data from HTML and returns the resulting RDF data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>uri</strong> (<em>str</em>) &#8211; URI for the HTML data. Note that the <code class="docutils literal"><span class="pre">text:</span></code> and <code class="docutils literal"><span class="pre">uploaded</span></code> fake URI values are treated separately; the former is for textual intput (in which case a <code class="docutils literal"><span class="pre">StringIO</span></code> instance is used to get the data) and the latter is for uploaded file, where the form gives access to the file directly.</li>
+<li><strong>form</strong> (<em>cgi.FieldStorage</em>) &#8211; the query parameters of the original request</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">HTTP response, containing the RDF data encoded in the format requested by the user (default: <code class="docutils literal"><span class="pre">turtle</span></code>), or an error message if applicable</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The function parses the HTML content using the built-in <code class="docutils literal"><span class="pre">RDFLib</span></code> microdata parser, and serializes the resulting RDF data using the serializaiton format requested by the user and returns the results. Serialization relies on the built-in <code class="docutils literal"><span class="pre">RDFLib</span></code> serializer for <code class="docutils literal"><span class="pre">turtle</span></code>, <code class="docutils literal"><span class="pre">nt</span></code>, or <code class="docutils literal"><span class="pre">RDF/XML</span></code>, and on an <code class="docutils literal"><span class="pre">RDFLib</span></code> extension package (<code class="docutils literal"><span class="pre">rdflib_jsonld</span></code>) for <code class="docutils literal"><span class="pre">JSON-LD</span></code>.</p>
 </dd></dl>
 
 </div>
@@ -94,7 +92,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
-      Last updated on 25 Jan, 2017.
+      Last updated on 26 Jan, 2017.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>

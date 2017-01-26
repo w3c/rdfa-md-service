@@ -44,19 +44,7 @@
   <h1>Source code for rdfa_md.validator_errors</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">RDFa 1.1 validator. Separate shell to generate error/warning messages</span>
-
-<span class="sd">@summary: RDFa validator</span>
-<span class="sd">@requires: Python version 2.5 or up</span>
-<span class="sd">@requires: U{RDFLib&lt;http://rdflib.net&gt;}; version 3.X is preferred, it has a more readable output serialization.</span>
-<span class="sd">@requires: U{html5lib&lt;http://code.google.com/p/html5lib/&gt;} for the HTML5 parsing.</span>
-<span class="sd">@requires: U{httpheader&lt;http://deron.meranda.us/python/httpheader/&gt;}; however, a small modification had to make on the original file, so for this reason and to make distribution easier this module (single file) is added to the distributed tarball.</span>
-<span class="sd">@requires: U{pyRdfa&lt;http://www.w3.org/2007/08/pyrdfa/&gt;}, version 3.X (i.e., corresponding to RDFa 1.1)</span>
-<span class="sd">@organization: U{World Wide Web Consortium&lt;http://www.w3.org&gt;}</span>
-<span class="sd">@author: U{Ivan Herman&lt;a href=&quot;http://www.w3.org/People/Ivan/&quot;&gt;}</span>
-<span class="sd">@license: This software is available for use under the</span>
-<span class="sd">U{W3C® SOFTWARE NOTICE AND LICENSE&lt;href=&quot;http://www.w3.org/Consortium/Legal/2002/copyright-software-20021231&quot;&gt;}</span>
-<span class="sd">@var html_page: the XHTML code as a template for the output</span>
+<span class="sd">Separate shell to generate human readable error/warning messages</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -73,14 +61,30 @@
 <div class="viewcode-block" id="Errors"><a class="viewcode-back" href="../../validator_errors.html#rdfa_md.validator_errors.Errors">[docs]</a><span class="k">class</span> <span class="nc">Errors</span><span class="p">:</span>
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Shell to generate error and warning messages to the output</span>
-<span class="sd">	@ivar domtree: the Document Node of the target DOM tree</span>
-<span class="sd">	@ivar target: the Element node for the error messages</span>
-<span class="sd">	@ivar error_graph: the RDFLib Graph to extract the error messages from</span>
+
+<span class="sd">	:param Validator validator: the validator instance that creates this instance</span>
+
+<span class="sd">	**Class variables:**</span>
+
+<span class="sd">	.. py:attribute:: domtree</span>
+
+<span class="sd">	   the Document Node of the target DOM tree; originates from the instantiating :py:class:`~.validator.Validator` instance.</span>
+
+<span class="sd">	.. py:attribute:: target</span>
+
+<span class="sd">	   the Element node for the error messages; originates from the instantiating :py:class:`~.validator.Validator` instance.</span>
+
+<span class="sd">	.. py:attribute:: error_graph</span>
+
+<span class="sd">	   the RDFLib Graph to extract the error messages from; originates from the instantiating :py:class:`~.validator.Validator` instance.</span>
+
+<span class="sd">	.. py:attribute:: validator</span>
+
+<span class="sd">	   the :py:class:`~.validator.Validator` instance that has created this instance</span>
+
+<span class="sd">	**Class methods:**</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">validator</span><span class="p">):</span>
-		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		@param validator: the validator instance that creates this instance</span>
-<span class="sd">		&quot;&quot;&quot;</span>
 		<span class="c1"># This is where the error messages are to be added</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">domtree</span>     <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">domtree</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">target</span>	     <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">message</span>
@@ -89,13 +93,12 @@
 
 <div class="viewcode-block" id="Errors._add_element_and_string"><a class="viewcode-back" href="../../validator_errors.html#rdfa_md.validator_errors.Errors._add_element_and_string">[docs]</a>	<span class="k">def</span> <span class="nf">_add_element_and_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Helper method: add a DOM element to the parent (unless element == &quot;&quot;) and add a text node to the results</span>
-<span class="sd">		@param parent: where to add the content</span>
-<span class="sd">		@type parent: DOM Element Node</span>
-<span class="sd">		@param element: element name for the new node; if &quot;&quot;, this is skipped</span>
-<span class="sd">		@type element: string</span>
-<span class="sd">		@param text: text to add as a text node</span>
-<span class="sd">		@param attrs: key value pairs for attributes to be added to the new element</span>
+<span class="sd">		Add a DOM element to the parent (unless element == &quot;&quot;) and add a text node to the results</span>
+
+<span class="sd">		:param Element parent: where to add the content</span>
+<span class="sd">		:param str element: element name for the new node; if &quot;&quot;, this is skipped</span>
+<span class="sd">		:param str text: text to add as a text node</span>
+<span class="sd">		:param attrs: key value pairs for attributes to be added to the new element</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="n">element</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
 			<span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domtree</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
@@ -108,24 +111,22 @@
 </div>
 <div class="viewcode-block" id="Errors._add_string"><a class="viewcode-back" href="../../validator_errors.html#rdfa_md.validator_errors.Errors._add_string">[docs]</a>	<span class="k">def</span> <span class="nf">_add_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">element</span> <span class="o">=</span> <span class="s2">&quot;p&quot;</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Helper method: add a DOM element to the error block (unless element == &quot;&quot;) and add a text node to the results</span>
-<span class="sd">		@param element: element name for the new node; if &quot;&quot;, this is skipped</span>
-<span class="sd">		@type element: string</span>
-<span class="sd">		@param text: text to add as a text node</span>
-<span class="sd">		@param attrs: key value pairs for attributes to be added to the new element</span>
+<span class="sd">		Add a DOM element to the error block (unless element == &quot;&quot;) and add a text node to the results</span>
+
+<span class="sd">		:param str element: element name for the new node; if &quot;&quot;, this is skipped</span>
+<span class="sd">		:param str text: text to add as a text node</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_add_element_and_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Errors.header"><a class="viewcode-back" href="../../validator_errors.html#rdfa_md.validator_errors.Errors.header">[docs]</a>	<span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Generate a header for &#39;e&#39; errors, &#39;w&#39; warnings and &#39;i&#39; information elements. Care is taken to produce</span>
-<span class="sd">		a gramatically correct English sentence. The restult is added to the DOM tree.</span>
-<span class="sd">		@param e: number of errors</span>
-<span class="sd">		@type e: integer</span>
-<span class="sd">		@param w: number of warnings</span>
-<span class="sd">		@type w: integer</span>
-<span class="sd">		@param i: number of information elements</span>
-<span class="sd">		@type i: integer</span>
+<span class="sd">		a gramatically correct English sentence. The result is added to the DOM tree (via the :py:meth:`_add_string` method)</span>
+
+<span class="sd">		:param int e: number of errors</span>
+<span class="sd">		:param int w: number of warnings</span>
+<span class="sd">		:param int i: number of information elements</span>
+
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">if</span> <span class="n">e</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
 			<span class="k">if</span> <span class="n">e</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="n">error</span> <span class="o">=</span> <span class="s2">&quot;is one error &quot;</span>
@@ -163,10 +164,10 @@
 </div>
 <div class="viewcode-block" id="Errors.one_message"><a class="viewcode-back" href="../../validator_errors.html#rdfa_md.validator_errors.Errors.one_message">[docs]</a>	<span class="k">def</span> <span class="nf">one_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subj</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Add a single message to the output</span>
-<span class="sd">		@param subj: RDF subject for the error</span>
-<span class="sd">		@type subj: RDFLib URIRef or BNode</span>
-<span class="sd">		@param header: one of &quot;Error&quot;, &quot;Warning&quot;, or &quot;Info&quot;, added to the final message&#39;s span as a class name, used for CSS</span>
+<span class="sd">		Add a single message to the output in the form of a paragraph with ``&lt;span&gt;`` elements</span>
+
+<span class="sd">		:param subj: RDF subject for the error (this is either an ``RDFLib`` ``URIRef`` or a ``BNode``)</span>
+<span class="sd">		:param str header: one of &quot;Error&quot;, &quot;Warning&quot;, or &quot;Info&quot;, added to the final message’s span as a class name, used for CSS</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_graph</span><span class="o">.</span><span class="n">triples</span><span class="p">((</span><span class="n">subj</span><span class="p">,</span> <span class="n">ns_dc</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">],</span> <span class="bp">None</span><span class="p">)):</span>
 			<span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domtree</span><span class="o">.</span><span class="n">createElement</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">)</span>
@@ -178,10 +179,11 @@
 </div>
 <div class="viewcode-block" id="Errors.messages"><a class="viewcode-back" href="../../validator_errors.html#rdfa_md.validator_errors.Errors.messages">[docs]</a>	<span class="k">def</span> <span class="nf">messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">msgs</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Add blocks of messages, preceded by an &lt;h3&gt; element for the title.</span>
-<span class="sd">		@param title: title string for the header</span>
-<span class="sd">		@param msgs: array of error subjects (ie, RDFLib Nodes)</span>
-<span class="sd">		@param header: one of &quot;Error&quot;, &quot;Warning&quot;, or &quot;Info&quot;, added to the final message&#39;s span as a class name, used for CSS</span>
+<span class="sd">		Add blocks of messages, preceded by an ``&lt;h3&gt;`` element for the title.</span>
+
+<span class="sd">		:param str title: title string for the header</span>
+<span class="sd">		:param list msgs: array of error subjects (ie, RDFLib Nodes)</span>
+<span class="sd">		:param str header: one of &quot;Error&quot;, &quot;Warning&quot;, or &quot;Info&quot;, added to the final message&#39;s span as a class name, used for CSS</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">_add_element_and_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
 		<span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">msgs</span><span class="p">:</span>
@@ -190,7 +192,9 @@
 <div class="viewcode-block" id="Errors.sort_array"><a class="viewcode-back" href="../../validator_errors.html#rdfa_md.validator_errors.Errors.sort_array">[docs]</a>	<span class="k">def</span> <span class="nf">sort_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Sort the entries of the arrays consiting of subjects of messages. Sorting is based on the time stamp that is</span>
-<span class="sd">		added to each of those messages.</span>
+<span class="sd">		added to each of those messages by the ``RDFLib`` parser.</span>
+
+<span class="sd">		:param list arr: array of RDF triples</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="n">to_sort</span> <span class="o">=</span> <span class="p">[]</span>
 		<span class="k">for</span> <span class="n">subj</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">:</span>
@@ -205,7 +209,7 @@
 </div>
 <div class="viewcode-block" id="Errors.interpret"><a class="viewcode-back" href="../../validator_errors.html#rdfa_md.validator_errors.Errors.interpret">[docs]</a>	<span class="k">def</span> <span class="nf">interpret</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">		Interpret the processor graph. Separates the warnings, errors, and information elements by message type,</span>
+<span class="sd">		Interpret the processor graph: separate the warnings, errors, and information elements by message type,</span>
 <span class="sd">		and displays the generated message strings in three different categories.</span>
 <span class="sd">		&quot;&quot;&quot;</span>
 		<span class="k">def</span> <span class="nf">_add_info</span><span class="p">():</span>
@@ -244,7 +248,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
-      Last updated on 25 Jan, 2017.
+      Last updated on 26 Jan, 2017.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>

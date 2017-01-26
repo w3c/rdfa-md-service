@@ -1,4 +1,4 @@
-Validator class
+Validator Class
 ===============
 
 .. automodule:: rdfa_md.validator

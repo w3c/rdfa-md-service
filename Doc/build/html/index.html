@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to RDFa and Microdata Services’s documentation &mdash; RDFa and Microdata Services—Documentation</title>
+    <title>RDFa and Microdata Services’s documentation &mdash; RDFa and Microdata Services—Documentation</title>
     
     <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -29,7 +29,7 @@
   <body role="document">
       <div class="header" role="banner"><h1 class="heading"><a href="#">
           <span>RDFa and Microdata Services—Documentation</span></a></h1>
-        <h2 class="heading"><span>Welcome to RDFa and Microdata Services’s documentation</span></h2>
+        <h2 class="heading"><span>RDFa and Microdata Services’s documentation</span></h2>
       </div>
       <div class="topnav" role="navigation" aria-label="top navigation">
       
@@ -43,16 +43,38 @@
       <div class="content">
         
         
-  <div class="section" id="welcome-to-rdfa-and-microdata-services-s-documentation">
-<h1>Welcome to RDFa and Microdata Services&#8217;s documentation<a class="headerlink" href="#welcome-to-rdfa-and-microdata-services-s-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="rdfa-and-microdata-services-s-documentation">
+<h1>RDFa and Microdata Services&#8217;s documentation<a class="headerlink" href="#rdfa-and-microdata-services-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>This package collects the functionalities of three different services at W3C:</p>
+<ul class="simple">
+<li>the <a class="reference external" href="https://www.w3.org/2012/pyRdfa/">“RDFa 1.1 Distiller and Parser”</a></li>
+<li>the <a class="reference external" href="https://www.w3.org/2012/pyRdfa/Validator.html">“RDFa Validator”</a></li>
+<li>the <a class="reference external" href="https://www.w3.org/2012/pyMicrodata/">“Microdata to RDF Distiller”</a></li>
+</ul>
+<p>All three services use a server side Python script, doing the work and returning the requested data. The Python scripts themselves rely on the RDFa and Microdata parsers, respectively, that are part of the standard <cite>RDFLib &lt;https://github.com/RDFLib/rdflib&gt;`_</cite> distribution. The scripts need, therefore, just a thin layer to get and interpret keyword arguments of an HTTP request, hand over the real work to RDFLib, and convert the result back through an HTTP Response. This package/repository collects this “thin layer” in one package. Furthermore, the repository includes (in the <cite>CGI-scripts</cite> folder) two python scripts that can be installed on a server to set up the service locally.</p>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>The dependencies of the package are:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/RDFLib/rdflib">RDFlib</a> which does all the heavy lifting for parsing. Use the latest release, currently 4.2.*.</li>
+<li><a class="reference external" href="https://github.com/RDFLib/rdflib-jsonld">RDFLib-JSONLD</a> to serialize the output into JSON-LD</li>
+<li><a class="reference external" href="https://pypi.python.org/pypi/html5lib">html5lib</a> to parse HTML</li>
+</ul>
+<p>The package requires Python2.7. The package has not yet been tested for Python3 although, manually, the code has been written in a Python3 compatible way; the real issue is whether the dependencies are Python3 ready or not. (Current situation, in January 2017: unknown for rdflib-jsonld, should be o.k. for html5lib, and rdflib must be installed separately for Python3. The rdflib issue should be solved, i.e., the same code should run on both Python2 and Python3 starting with version 5. That version should become official by the end of 2017)</p>
+</div>
+<div class="section" id="history">
+<h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<p>These services exist since 2012 but, at that time, the structure and set up was different. The RDFa, respectively the Microdata parsers were separate packages <em>on top</em> of RDFLib, and the server side processing relied on that. In other words, installation and maintenance of the service required maintaining a rather large package that was maintained by one individual. However, around 2014, both parsers <em>have been incorporated into RDFLib</em> and are now part of the standard distribution. Maintaining the separate package has become obsolete, hence this new package that relies exclusively on the latest version of RDFLib.</p>
+</div>
 <div class="section" id="metadata">
 <h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Version: 1.0</li>
-<li>Document creation date: January 25, 2017</li>
+<li>Document creation date: January 26, 2017</li>
 <li>Author: Ivan Herman</li>
 <li>Contact: <a class="reference external" href="mailto:ivan&#37;&#52;&#48;w3&#46;org">ivan<span>&#64;</span>w3<span>&#46;</span>org</a></li>
 <li>Repository: &lt;<a class="reference external" href="https://github.com/w3c/rdfa-md-service">https://github.com/w3c/rdfa-md-service</a>&gt;</li>
+<li>License: Copyright(c) 2017 W3C® (MIT, ERCIM, Keio, Beihang), see <a class="reference external" href="https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document">W3C Software and Document Notice and License</a> for details.</li>
 </ul>
 </div>
 </div>
@@ -63,7 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="init.html">1. Top level error methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mdata.html">2. Microdata extraction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rdfa.html">3. RDFa extraction and validation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="validator.html">4. Validator class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validator.html">4. Validator Class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="validator_errors.html">5. Display validation errors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="validator_html.html">6. Validator HTML template</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">7. Common Utilities</a></li>
@@ -93,7 +115,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
-      Last updated on 25 Jan, 2017.
+      Last updated on 26 Jan, 2017.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
