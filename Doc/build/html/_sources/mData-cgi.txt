@@ -1,0 +1,7 @@
+Common Utilities
+================
+
+.. automodule:: CGI-scripts.mData-cgi
+    :members:
+    :private-members:
+    :undoc-members:

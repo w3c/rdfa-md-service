@@ -2,17 +2,10 @@
 
 Python modules to run the [“RDFa 1.1 Distiller”](https://www.w3.org/2012/pyRdfa/), [“RDFa 1.1 Validator”](https://www.w3.org/2012/pyRdfa/Validator.html), and [“Microdata to RDF”](https://www.w3.org/2012/pyMicrodata/) services at W3C.
 
-All three services are based on the newest releases of [RDFLib](https://github.com/RDFLib/rdflib), that include the parsers for both RDFa and for Microdata. This module includes the scripts to
-
-* serve as a CGI entries on Apache
-* check the error handling for each of these services
-* collect the form data coming from the HTML pages, call out to the RDF parsing and return the serialized graph or (in the case of the RDFa Validator) generate a proper HTML response.
-
 ## Repo content:
 
 - `rdfa_md`: The relevant Python package covering both the RDFa and the Microdata branches. Put this module somewhere in $PYTHONPATH.
 - `CGI-scripts`: Python scripts that can be used as CGI entry points on a web site. These scripts are minimal; after a rudimentary checking on the incoming URI-s they dive into the functionalities in `rdf_md`.
-
 
 ## External dependencies
 

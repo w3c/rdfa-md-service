@@ -15,6 +15,9 @@
 import sys
 import os
 import shlex
+# This may have to be adapted to a local setup!
+sys.path.insert(0,"/Users/ivan/W3C/github/rdfa-md-service")
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

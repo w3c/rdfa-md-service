@@ -62,6 +62,10 @@
 </ul>
 <p>The package requires Python2.7. The package has not yet been tested for Python3 although, manually, the code has been written in a Python3 compatible way; the real issue is whether the dependencies are Python3 ready or not. (Current situation, in January 2017: unknown for rdflib-jsonld, should be o.k. for html5lib, and rdflib must be installed separately for Python3. The rdflib issue should be solved, i.e., the same code should run on both Python2 and Python3 starting with version 5. That version should become official by the end of 2017)</p>
 </div>
+<div class="section" id="additional-scripts">
+<h2>Additional scripts<a class="headerlink" href="#additional-scripts" title="Permalink to this headline">¶</a></h2>
+<p>The repository also includes two scripts that can be used as CGI entries for RDFa Distiller and Validator and for Microdata Distiller, respectively.</p>
+</div>
 <div class="section" id="history">
 <h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
 <p>These services exist since 2012 but, at that time, the structure and set up was different. The RDFa, respectively the Microdata parsers were separate packages <em>on top</em> of RDFLib, and the server side processing relied on that. In other words, installation and maintenance of the service required maintaining a rather large package that was maintained by one individual. However, around 2014, both parsers <em>have been incorporated into RDFLib</em> and are now part of the standard distribution. Maintaining the separate package has become obsolete, hence this new package that relies exclusively on the latest version of RDFLib.</p>
@@ -90,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="validator_html.html">6. Validator HTML template</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">7. Common Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cleanhtml.html">8. Clean generated HTML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RDFa_cgi.html">9. RDFa services entry point</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mData_cgi.html">10. Microdata service entry point</a></li>
 </ul>
 </div>
 </div>

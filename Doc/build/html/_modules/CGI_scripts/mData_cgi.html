@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CGI_scripts.mData_cgi &mdash; RDFa and Microdata Services—Documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="RDFa and Microdata Services—Documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../../index.html">
+          <span>RDFa and Microdata Services—Documentation</span></a></h1>
+        <h2 class="heading"><span>CGI_scripts.mData_cgi</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        <a class="uplink" href="../../index.html">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <h1>Source code for CGI_scripts.mData_cgi</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># Maintainer: Ivan Herman &lt;ivan@w3.org&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">CGI entry point for the Microdata extraction via RDFLib.</span>
+
+<span class="sd">This version is adapted, for Python paths, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
+<span class="kn">import</span> <span class="nn">cgi</span>
+<span class="kn">import</span> <span class="nn">cgitb</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="c1">#cgi.print_environ()</span>
+
+<span class="c1"># Necessary setup on various environments. This may have to be adapted when</span>
+<span class="c1"># installing the scripts on another architecture. &quot;darwin&quot; refers to my local</span>
+<span class="c1"># Mac (and is therefore used for testing); W3C runs on linux machines.</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span> <span class="p">:</span>
+	<span class="c1"># this is my local machine</span>
+	<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;/Users/ivan/Library/Python&quot;</span><span class="p">)</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PyRdfaCacheDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/Users/ivan/.pyrdfa-cache&#39;</span>
+	<span class="n">running_at_w3c</span> <span class="o">=</span> <span class="bp">False</span>
+	<span class="n">cgitb</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
+<span class="k">else</span> <span class="p">:</span>
+	<span class="c1"># this is the server on W3C</span>
+	<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;/usr/local/lib/python2.4/site-packages/PythonLib-IH&quot;</span><span class="p">)</span>
+	<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;/usr/local/lib/python2.4/site-packages/PythonLib-IH/rdfa-1.1&quot;</span><span class="p">)</span>
+	<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PyRdfaCacheDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/usr/local/apache/cgi/cgi-bin-other/RDFa/data-local&#39;</span>
+	<span class="n">running_at_w3c</span> <span class="o">=</span> <span class="bp">True</span>
+	<span class="n">cgitb</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logdir</span><span class="o">=</span><span class="s2">&quot;/home/nobody/tracebacks/&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">rdfa_md</span> <span class="kn">import</span> <span class="n">extract_microdata</span><span class="p">,</span> <span class="n">err_message</span><span class="p">,</span> <span class="n">brett_test</span>
+
+
+<div class="viewcode-block" id="uri_test"><a class="viewcode-back" href="../../mData_cgi.html#CGI_scripts.mData_cgi.uri_test">[docs]</a><span class="k">def</span> <span class="nf">uri_test</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span> <span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;Testing, when running on W3C, the safety of the URL.</span>
+<span class="sd">	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.</span>
+
+<span class="sd">	If this test reveals any problem, the script exits!!!</span>
+
+<span class="sd">	:param uri: the URI to be checked.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="n">running_at_w3c</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">brett_test</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="process_input"><a class="viewcode-back" href="../../mData_cgi.html#CGI_scripts.mData_cgi.process_input">[docs]</a><span class="k">def</span> <span class="nf">process_input</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Pre-rocess the form data. If all checking and processing is fine, call out to processURI</span>
+<span class="sd">	to do the real work.</span>
+
+<span class="sd">	:param form: form data, as returned by Python&#39;s FieldStorage</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+	<span class="c1"># The &#39;uri&#39; term is modified to be turned into a &#39;fake&#39; value to denote the upload and text cases.</span>
+	<span class="k">if</span> <span class="s2">&quot;uploaded&quot;</span> <span class="ow">in</span> <span class="n">form</span> <span class="ow">and</span> <span class="n">form</span><span class="p">[</span><span class="s2">&quot;uploaded&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">file</span> <span class="p">:</span>
+		<span class="c1"># The real data is stored in the form as a reference to a file</span>
+		<span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;uploaded:&quot;</span>
+	<span class="k">elif</span> <span class="s2">&quot;text&quot;</span> <span class="ow">in</span> <span class="n">form</span> <span class="ow">and</span> <span class="n">form</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">form</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">:</span>
+		<span class="n">uri</span>  <span class="o">=</span> <span class="s2">&quot;text:&quot;</span>
+	<span class="k">else</span> <span class="p">:</span>
+		<span class="c1"># Either there is an error, and we have to stop there, or it is a real URI</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;uri&quot;</span> <span class="ow">in</span> <span class="n">form</span> <span class="p">:</span>
+			<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Content-type: text/html; charset=utf-8&#39;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Status: 400 Invalid Input&#39;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;html&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;head&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;title&gt;Error in Microdata processing&lt;/title&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/head&gt;&lt;body&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;h1&gt;Error in converting Microdata&lt;/h1&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;p&gt;No URI has been specified&lt;/p&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/body&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/html&gt;&quot;</span><span class="p">)</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">try</span> <span class="p">:</span>
+			<span class="n">uri</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">getfirst</span><span class="p">(</span><span class="s2">&quot;uri&quot;</span><span class="p">)</span>
+		<span class="k">except</span> <span class="p">:</span>
+			<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Content-type: text/html; charset=utf-8&#39;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Status: 400 Invalid Input&#39;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;html&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;head&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;title&gt;Error in Microdata processing&lt;/title&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/head&gt;&lt;body&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;h1&gt;rror in converting Microdata&lt;/h1&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;No URI has been specified&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/body&gt;&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&lt;/html&gt;&quot;</span><span class="p">)</span>
+			<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+	<span class="c1"># If we got here, we should have the data hidden, in some way or other, behind the form data</span>
+	<span class="c1"># and/or the URI</span>
+	<span class="k">try</span> <span class="p">:</span>
+		<span class="c1"># Thanks to Sergio and Diego for the idea and code for the referer branch</span>
+		<span class="k">if</span> <span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;referer&quot;</span> <span class="p">:</span>
+			<span class="n">uri</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;HTTP_REFERER&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">uri</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+				<span class="n">newuri</span> <span class="o">=</span> <span class="s2">&quot;http://www.w3.org/2012/pyMicrodata/no_referer.html&quot;</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">uri_test</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+				<span class="n">newuri</span> <span class="o">=</span> <span class="s2">&quot;http://www.w3.org/2012/pyMicrodata/extract?uri=&quot;</span> <span class="o">+</span> <span class="n">uri</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Status: 307 Moved Temporarily&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Location: &quot;</span> <span class="o">+</span> <span class="n">newuri</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+		<span class="k">else</span> <span class="p">:</span>
+			<span class="c1"># last point of check: use Brett&#39;s script to check the validity of the URI</span>
+			<span class="c1"># Note that if the test reveals any problems, the script returns a message and exists</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">uri</span> <span class="o">==</span> <span class="s1">&#39;text:&#39;</span> <span class="ow">or</span> <span class="n">uri</span> <span class="o">==</span> <span class="s1">&#39;uploaded:&#39;</span><span class="p">)</span> <span class="p">:</span> <span class="n">uri_test</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+
+			<span class="k">print</span><span class="p">(</span> <span class="n">extract_microdata</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">form</span><span class="p">)</span> <span class="p">)</span>
+	<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span> <span class="p">:</span>
+		<span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+		<span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">))</span>
+		<span class="n">err_message</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="s1">&#39;Exception raised: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+
+
+
+<span class="c1">#######################################################################################</span></div>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">process_input</span><span class="p">(</span><span class="n">cgi</span><span class="o">.</span><span class="n">FieldStorage</span><span class="p">())</span>
+
+<span class="c1"># The real CGI processing!!</span>
+</pre></div>
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        <a class="uplink" href="../../index.html">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
+      Last updated on 26 Jan, 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

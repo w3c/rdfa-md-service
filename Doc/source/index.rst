@@ -25,6 +25,11 @@ The dependencies of the package are:
 
 The package requires Python2.7. The package has not yet been tested for Python3 although, manually, the code has been written in a Python3 compatible way; the real issue is whether the dependencies are Python3 ready or not. (Current situation, in January 2017: unknown for rdflib-jsonld, should be o.k. for html5lib, and rdflib must be installed separately for Python3. The rdflib issue should be solved, i.e., the same code should run on both Python2 and Python3 starting with version 5. That version should become official by the end of 2017)
 
+Additional scripts
+------------------
+
+The repository also includes two scripts that can be used as CGI entries for RDFa Distiller and Validator and for Microdata Distiller, respectively.
+
 History
 -------
 
@@ -57,6 +62,8 @@ Metadata
   validator_html
   utils
   cleanhtml
+  RDFa_cgi.rst
+  mData_cgi
 
 Indices and tables
 ==================
