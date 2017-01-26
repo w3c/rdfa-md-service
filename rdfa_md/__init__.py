@@ -10,6 +10,7 @@ from __future__ import print_function
 __version__ = "1.0"
 __author__  = 'Ivan Herman'
 __contact__ = 'Ivan Herman, ivan@w3.org'
+__email__   = 'ivan@w3.org'
 __license__ = 'W3C® SOFTWARE NOTICE AND LICENSE, https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document'
 
 import sys
@@ -32,7 +33,7 @@ import traceback, cgi
 def err_message(uri, msg):
 	"""
 	Prints an error message as an HTTP response in HTML.
-	
+
 	:param str uri: The URI used to start up the script
 	:param str msg: The extra message to be displayed
 
