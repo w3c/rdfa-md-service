@@ -6,6 +6,8 @@ CGI entry point for the Microdata extraction via RDFLib.
 
 This is meant to be a CGI script: i.e., it auto-executes if invoked by calling :py:func:`process_input` with a ``cgi.FieldStorage()`` instance as an argument.
 
+“Output” of this script manifests itself as strings sent to the standard output (via “print” calls), and the underlying system takes care of turning this into information sent back through the HTTP wire.
+
 This version is set up, as far as the Python paths are concerned, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.
 
 **Global variables:**
@@ -48,18 +50,21 @@ def uri_test(uri) :
 	"""Testing, when running on W3C, the safety of the URL.
 	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.
 
-	If this test reveals any problem, the script exits!!!
+	The test is done via :py:func:`~rdfa_md.brett_test`.
 
 	:param uri: the URI to be checked.
 	"""
 	if running_at_w3c and not brett_test(uri): sys.exit(1)
 
 def process_input(form):
-	"""Pre-rocess the form data. If all checking and processing is fine, call out to processURI
-	to do the real work.
+	"""Check the URI of the target then start the real processing.
 
 	:param form: keyword arguments of the HTTP call
 	:type form: cgi.FieldStorage
+
+	If the uri is fine, the script calls out to :py:func:`~rdfa_md.mdata.extract_microdata`. That function is also responsible to “respond”, i.e., to print the HTTP response to the standard output.
+
+	This function also takes care of an HTTP_REFERER header, leading to a 307 response (triggering the client to re-issue the call with a proper URI).
 	"""
 
 	uri = ""

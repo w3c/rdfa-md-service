@@ -50,6 +50,8 @@
 
 <span class="sd">This is meant to be a CGI script: i.e., it auto-executes if invoked by calling :py:func:`process_input` with a ``cgi.FieldStorage()`` instance as an argument.</span>
 
+<span class="sd">“Output” of this script manifests itself as strings sent to the standard output (via “print” calls), and the underlying system takes care of turning this into information sent back through the HTTP wire.</span>
+
 <span class="sd">This version is set up, as far as the Python paths are concerned, to the particualarities of the W3C setup as well as my own machine. On a specific installation things have to be re-adapted in a fairly straightforward manner.</span>
 
 <span class="sd">**Global variables:**</span>
@@ -91,21 +93,26 @@
 
 
 <div class="viewcode-block" id="uri_test"><a class="viewcode-back" href="../../RDFa_cgi.html#CGI_scripts.RDFa_cgi.uri_test">[docs]</a><span class="k">def</span> <span class="nf">uri_test</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span> <span class="p">:</span>
-	<span class="sd">&quot;&quot;&quot;Testing, when running on W3C, the safety of the URL.</span>
-<span class="sd">	If the the test does not pass, ie an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.</span>
+	<span class="sd">&quot;&quot;&quot;Test, when running on W3C, the safety of the URL.</span>
 
-<span class="sd">	If this test reveals any problem, the script exits!!!</span>
+<span class="sd">	If the the test does not pass, ie, an exception is raised somewhere down the line, an error message is sent back (via HTTP) to the caller, and everything stops.</span>
+
+<span class="sd">	The test is done via :py:func:`~rdfa_md.brett_test`.</span>
 
 <span class="sd">	:param uri: the URI to be checked.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">if</span> <span class="n">running_at_w3c</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">brett_test</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
 </div>
 <div class="viewcode-block" id="process_input"><a class="viewcode-back" href="../../RDFa_cgi.html#CGI_scripts.RDFa_cgi.process_input">[docs]</a><span class="k">def</span> <span class="nf">process_input</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Pre-rocess the form data. If all checking and processing is fine, call out to processURI</span>
-<span class="sd">	to do the real work.</span>
+	<span class="sd">&quot;&quot;&quot;Check the URI of the target then start the real processing.</span>
 
 <span class="sd">	:param form: keyword arguments of the HTTP call</span>
 <span class="sd">	:type form: cgi.FieldStorage</span>
+
+<span class="sd">	If the uri is fine, the script calls out to either :py:func:`~rdfa_md.rdfa.validate_rdfa` or to :py:func:`~rdfa_md.rdfa.extract_rdf`, depending on whether the &quot;validate&quot; key appears in the form or not. Those functions are also responsible to “respond”, i.e., to print the HTTP response to the standard output.</span>
+
+<span class="sd">	This function also takes care of an HTTP_REFERER header, leading to a 307 response (triggering the client to re-issue the call with a proper URI).</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 
 	<span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -191,7 +198,7 @@
 
     <div class="footer" role="contentinfo">
         &copy; Copyright Copyright (c) 2017 W3C® (MIT, ERCIM, Keio, Beihang).
-      Last updated on 26 Jan, 2017.
+      Last updated on 27 Jan, 2017.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
