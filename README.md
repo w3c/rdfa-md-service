@@ -1,6 +1,6 @@
 # THIS IS NOT OPERATIONAL ANY MORE
 
-** This version relied on a status whereby the RDFa, Microdata, etc, parsers were part of the RDFLib distribution. That will not be the case any more, so these services are not really of use any more. **
+**This version relied on a status whereby the RDFa, Microdata, etc, parsers were part of the RDFLib distribution. That will not be the case any more, so these services are not really of use any more.**
 
 # rdfa-md-service
 
