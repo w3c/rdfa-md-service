@@ -1,3 +1,7 @@
+# THIS IS NOT OPERATIONAL ANY MORE
+
+** This version relied on a status whereby the RDFa, Microdata, etc, parsers were part of the RDFLib distribution. That will not be the case any more, so these services are not really of use any more. **
+
 # rdfa-md-service
 
 Python modules to run the [“RDFa 1.1 Distiller”](https://www.w3.org/2012/pyRdfa/), [“RDFa 1.1 Validator”](https://www.w3.org/2012/pyRdfa/Validator.html), and [“Microdata to RDF”](https://www.w3.org/2012/pyMicrodata/) services at W3C.
